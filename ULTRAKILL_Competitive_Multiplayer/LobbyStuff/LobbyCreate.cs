@@ -35,7 +35,7 @@ namespace UltraIDK
         }
         void Cracked()
         {
-            cracked = Class1.CrackedToggle.isOn;
+            cracked = CompMultiplayerMain.CrackedToggle.isOn;
         }
 
         void Mods()
@@ -59,7 +59,7 @@ namespace UltraIDK
             Mods();
 
             MultiplayerUtil.LobbyManager.CreateLobby(LobbyName, maxPlayers, publicLobby, cracked, cheats, mods, ("UKCM", "EtcEtc"));
-            Class1.instance.LoadMultiplayerScene();
+            CompMultiplayerMain.instance.LoadMultiplayerScene();
         }
 
     }

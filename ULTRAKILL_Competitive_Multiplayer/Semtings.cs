@@ -72,7 +72,7 @@ namespace UltraIDK
                     return;
                 }
 
-                Class1.cracked = settings.cracked;
+                CompMultiplayerMain.cracked = settings.cracked;
             }
             catch (Exception ex)
             {

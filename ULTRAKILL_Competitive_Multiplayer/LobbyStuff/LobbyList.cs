@@ -58,7 +58,7 @@ namespace UltraIDK
 
                 pesudoLobby.ID = lob.Id.ToString();
 
-                Transform lobby = Instantiate(Class1.LobbyPrefab, Class1.LobbyParent.transform).transform;
+                Transform lobby = Instantiate(CompMultiplayerMain.LobbyPrefab, CompMultiplayerMain.LobbyParent.transform).transform;
                 lobbies.Add(lobby, lob);
                 lobby.Find("_/Name").GetComponent<TMP_Text>().text = pesudoLobby.Name;
                 lobby.Find("_/Members").GetComponent<TMP_Text>().text = pesudoLobby.Members;

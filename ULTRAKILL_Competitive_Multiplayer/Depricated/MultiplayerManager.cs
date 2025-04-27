@@ -267,7 +267,7 @@
 
 //            try
 //            {
-//                SteamClient.Init(Class1.appId);
+//                SteamClient.Init(CompMultiplayerMain.appId);
 //                Clogger.Log("Reinited steam");
 //            }
 //            catch (Exception e) { Clogger.LogError($"STEAM ERROR: {e}"); Clogger.LogWarning("Try launching steam if it isnt launched!"); }
@@ -371,7 +371,7 @@
 //    {
 //        if (id == selfID) return;
 
-//        GameObject enemyModel = Instantiate(Class1.MultiplayerModel, Vector3.zero, Quaternion.identity);
+//        GameObject enemyModel = Instantiate(CompMultiplayerMain.MultiplayerModel, Vector3.zero, Quaternion.identity);
 //        enemyModel.name = id.ToString();
 //        enemyModel.transform.localScale = new Vector3(1.9f, 1.9f, 1.9f);
 //        Transform enem = enemyModel.transform.Find("v1_mdl_0");
@@ -455,7 +455,7 @@
 //    {
 //        if (loadScene == false) return;
 
-//        string[] scenePaths = Class1.sceneBundle.GetAllScenePaths();
+//        string[] scenePaths = CompMultiplayerMain.sceneBundle.GetAllScenePaths();
 //        if (scenePaths.Length > 0)
 //        {
 //            string sceneName = Path.GetFileNameWithoutExtension(scenePaths.FirstOrDefault());

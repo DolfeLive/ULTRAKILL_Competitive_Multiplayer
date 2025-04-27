@@ -37,7 +37,7 @@ public static class Logger
             }
         }
 
-        string formattedMessage = $"[{Class1.modName}] [{callingMethod}] {msg}";
+        string formattedMessage = $"[{CompMultiplayerMain.modName}] [{callingMethod}] {msg}";
 
         UnityEngine.Debug.Log(formattedMessage);
 #elif RELEASE
@@ -48,7 +48,7 @@ public static class Logger
     private static void Log(string message, EType etype, ELogType eLogType = ELogType.Normal)
     {
         string callingNamespace = GetCallingNamespace();
-        string formattedMessage = $"[{Class1.modName}] [{callingNamespace}]{(etype != EType.None ? (etype == EType.Client ? " [Client]" : " [Server]") : "")} {message}";
+        string formattedMessage = $"[{CompMultiplayerMain.modName}] [{callingNamespace}]{(etype != EType.None ? (etype == EType.Client ? " [Client]" : " [Server]") : "")} {message}";
 
         switch (eLogType)
         {
