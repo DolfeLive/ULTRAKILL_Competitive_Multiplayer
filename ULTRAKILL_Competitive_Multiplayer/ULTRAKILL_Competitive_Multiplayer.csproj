@@ -40,7 +40,7 @@
       <HintPath>C:\UltrakillDeps\Unity.Addressables.dll</HintPath>
     </Reference>
     <Reference Include="Unity.AI.Navigation">
-      <HintPath>..\..\..\_UltrakillDeps\Unity.AI.Navigation.dll</HintPath>
+	  <HintPath>C:\UltrakillDeps\Unity.AI.Navigation.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ResourceManager">
       <HintPath>C:\UltrakillDeps\Unity.ResourceManager.dll</HintPath>
@@ -55,7 +55,7 @@
       <HintPath>C:\UltrakillDeps\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\..\_UltrakillDeps\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>C:\UltrakillDeps\UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>C:\UltrakillDeps\UnityEngine.CoreModule.dll</HintPath>
