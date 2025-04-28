@@ -132,49 +132,6 @@ namespace UltraIDK
         }
     }
 
-    [HarmonyPatch(typeof(UnityEngine.Graphics))]
-    class GraphicsBlitWildcard
-    {
-        static IEnumerable<MethodBase> TargetMethods()
-        {
-            return typeof(UnityEngine.Graphics)
-                .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
-                .Where(m => m.Name == "Blit");
-        }
-
-        static void Prefix(params object[] __args)
-        {
-            Debug.Log($"Graphics.Blit called. Args: {string.Join(", ", __args.Select(a => a?.ToString() ?? "null"))}");
-        }
-    }
-
-    [HarmonyPatch(typeof(UnityEngine.Material), "SetPass")]
-    class Patch_Material_SetPass
-    {
-        static void Prefix(Material __instance, int pass)
-        {
-            if (__instance == null) return;
-
-            if (pass >= __instance.passCount)
-            {
-                Debug.LogError($"[Material.SetPass] Invalid pass {pass} on material '{__instance.name ?? "null"}' with passCount={__instance.passCount}");
-                Debug.LogError(UnityEngine.StackTraceUtility.ExtractStackTrace());
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(UnityEngine.Rendering.CommandBuffer), "Blit", new Type[] { typeof(Texture), typeof(RenderTargetIdentifier), typeof(Material), typeof(int) })]
-    class Patch_CommandBuffer_Blit
-    {
-        static void Prefix(Texture source, UnityEngine.Rendering.RenderTargetIdentifier dest, Material mat, int pass)
-        {
-            if (mat != null && pass >= mat.passCount)
-            {
-                Debug.LogError($"[CommandBuffer.Blit] Invalid pass {pass} on material {mat.name}");
-            }
-        }
-    }
-
 
     [HarmonyPatch(typeof(EndlessGrid), "LoadPattern")]
     public static class EndlessGrid_LoadPattern_Patch
@@ -223,7 +180,7 @@ namespace UltraIDK
     }
 
     [HarmonyPatch(typeof(EndlessGrid), "Update")]
-    class EndlessUpdatePatches
+    public static class EndlessUpdatePatches
     {
         [HarmonyPrefix]
         public static void UpdatePatch()
@@ -231,13 +188,12 @@ namespace UltraIDK
             if (CompMultiplayerMain.instance.inMultiplayerScene)
             {
                 return;
-                Debug.Log("prevented org Endless");
             }
         }
     }
 
     [HarmonyPatch(typeof(ActivateNextWave), "FixedUpdate")]
-    class NextWavePatches
+    public static class NextWavePatches
     {
         [HarmonyPrefix]
         public static void UpdatePatch()
@@ -245,13 +201,12 @@ namespace UltraIDK
             if (CompMultiplayerMain.instance.inMultiplayerScene)
             {
                 return;
-                Debug.Log("prevented org Endless");
             }
         }
     }
 
     [HarmonyPatch(typeof(EndlessGrid), "NextWave")]
-    class nwPatch
+    public static class nwPatch
     {
         [HarmonyPrefix]
         public static void nwPatch22()

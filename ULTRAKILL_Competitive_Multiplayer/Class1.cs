@@ -14,6 +14,10 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Collections;
+using ULTRAKILL_Competitive_Multiplayer;
+using Unity.AI.Navigation;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace UltraIDK
 {
@@ -57,6 +61,93 @@ namespace UltraIDK
             string bundlePath = Paths.PluginPath;
             LoadAssets(bundlePath);
             //InvokePrivate<MyTargetClass>(null, "MyPrivateStaticMethod", new object[] { "Hello, world!" });
+            AddPatterns();
+        }
+
+        void AddPatterns()
+        {
+            /*
+            ArenaPattern arena = ScriptableObject.CreateInstance<ArenaPattern>();
+            arena.name = "Arena1";
+            arena.heights =
+@"(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
+(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
+(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
+(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
+(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
+(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
+(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
+            patterns.Add(arena);
+
+            ArenaPattern arena2 = ScriptableObject.CreateInstance<ArenaPattern>();
+            arena2.name = "Arena2";
+            arena2.heights =
+@"(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
+(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
+(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
+(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(5)(5)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(5)(5)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
+(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
+(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
+(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
+(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
+            patterns.Add(arena2);
+            */
+            
+            string GeneratePattern(int width, int height, int minValue, int maxValue)
+            {
+                System.Random rand = new System.Random();
+                StringBuilder sb = new StringBuilder();
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int number = rand.Next(minValue, maxValue + 1);
+                        sb.Append($"({number})");
+                    }
+                    if (y != height - 1)
+                        sb.Append("\n");
+                }
+
+                return sb.ToString();
+            }
+            Task addPatterns = new Task(() =>
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    string pattern = GeneratePattern(32, 32, 0, 5);
+                    ArenaPattern arena = ScriptableObject.CreateInstance<ArenaPattern>();
+                    arena.name = $"randomArena{i}";
+                    arena.heights = pattern;
+                    patterns.Add(arena);
+                }
+                
+            });
+            addPatterns.Start();
+            
+            // string pattern = GeneratePattern(32, 32, 0, 5);            
+            // ArenaPattern randomArena = ScriptableObject.CreateInstance<ArenaPattern>();
+            // randomArena.name = "randomArena";
+            // randomArena.heights = pattern;
+            // patterns.Add(randomArena);
+
         }
 
         void crackedToggleChanged(bool newVal)
@@ -81,8 +172,6 @@ namespace UltraIDK
             LobbyPrefab = AssetsBundle.LoadAsset<GameObject>("Lobby");
             MultiplayerMenu = AssetsBundle.LoadAsset<GameObject>("Multiplayer Menu");
             MultiplayerModel = AssetsBundle.LoadAsset<GameObject>("MultiplayerModelV2");
-
-
         }
         public void Update()
         {
@@ -97,7 +186,27 @@ namespace UltraIDK
                 NewMovementRespawn();
                 
             }
+            else if (Input.GetKeyDown(KeyCode.O))
+            { 
+                print($"Pat indx: {patternIndex}, patterns cnt: {patterns.Count}, patterns: {patterns.Select(_ => _.name)}");
+                patternIndex++;
+                if (patternIndex > patterns.Count - 1)
+                {
+                    patternIndex = 0;
+                }
+                CustomCybergrind cybergrind = FindFirstObjectByType<CustomCybergrind>();
+                if (cybergrind == null)
+                {
+                    Debug.LogError("cybergrind is null");
+                    return;
+                }
+                print($"Loading pattern: {patterns[patternIndex].name}, {patternIndex}");
+                cybergrind.LoadPattern(patterns[patternIndex]);
+            }
         }
+        public List<ArenaPattern> patterns = new();
+        int patternIndex = 0;
+
         NewMovement nm;
 
         int deaths = 0;
@@ -380,57 +489,103 @@ namespace UltraIDK
             }
             if (scene.name == "MEATGRINDER")
             {
-                print(NewMovement.Instance != null);
+                print($"Newmovment exists: {NewMovement.Instance != null}");
                 NewMovement.Instance.hp = 150;
                 nm = NewMovement.Instance;
                 inMultiplayerScene = true;
                 print("now in multiplayer scene!");
                 StartCoroutine(DoCGStuff());
+                //DoCGStuff();
             }
         }
 
         IEnumerator DoCGStuff()
         {
             yield return new WaitForSeconds(0.5f);
-            ArenaPattern arena = ScriptableObject.CreateInstance<ArenaPattern>();
-            arena.name = "Arena1";
-            arena.heights =
-@"(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
-(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
-(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
-(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
-(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
-(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
-(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
-(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
-(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
-(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
-(1)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(1)(1)
-(1)(1)(3)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(3)(1)(1)
-(2)(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(4)(2)(2)
-(2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
-(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
-(2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
-            EndlessGrid cg = FindFirstObjectByType<EndlessGrid>();
-            cg.customPatterns = new ArenaPattern[1];
-            if (cg.customPatterns.Length > 0)
+
+            EndlessGrid cybergrid = FindFirstObjectByType<EndlessGrid>();
+            if (cybergrid == null)
             {
-                cg.customPatterns[0] = arena;
+                Debug.LogError("Cybergrind is null");
+                yield break;
+            }
+
+
+            GameObject arenaGO = cybergrid.gameObject;
+            PrefabDatabase prefabs = cybergrid.prefabs;
+            GameObject gridCube = cybergrid.gridCube;
+            NavMeshSurface navMeshSurface = cybergrid.nms;
+            EndlessCube[][] Cubes = cybergrid.cubes;
+
+            for (int i = 0; i < Cubes.Length; i++)
+            {
+                for (int j = 0; j < Cubes[i].Length; j++)
+                {
+                    Destroy(Cubes[i][j]);
+                }
+            }
+
+            GameObject combinedGridStaticObject = cybergrid.combinedGridStaticObject;
+            float offset = 5f;
+            float glowMult = 1f;
+            
+            DestroyImmediate(cybergrid);
+            if (cybergrid == null)
+            {
+                Debug.Log("Deletion sucsessful");
+            }
+            
+            CustomCybergrind cg = arenaGO.AddComponent<CustomCybergrind>();
+            cg.gridCube = gridCube; 
+            cg.prefabs = prefabs;
+            cg.nms = navMeshSurface;
+            cg.offset = 5;
+            cg.glowMultiplier = 1f;
+            cg.combinedGridStaticObject = combinedGridStaticObject;
+            
+            cg.Init();
+            
+            if (cg == null)
+            {
+                Debug.LogError("cg creation failed!");
+                yield break;
+            }
+            /*
+            [Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
+Stack trace:
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.CreateSubmeshes (System.Collections.Generic.List`1[T] materials) (at <818eee5ee85c4958aefb5380d16abe11>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.SetupStaticGridMesh () (at <818eee5ee85c4958aefb5380d16abe11>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.TrySetupStaticGridMesh () (at <818eee5ee85c4958aefb5380d16abe11>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.Init () (at <818eee5ee85c4958aefb5380d16abe11>:0)
+UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <818eee5ee85c4958aefb5380d16abe11>:0)
+UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
+*/
+            
+            
+            print($"cubes: {cg.cubes}");
+            
+            if (patterns[patternIndex] != null)
+            {
+                cg.customPatterns = new ArenaPattern[1];
+                cg.customPatterns[0] = patterns[patternIndex];
                 cg.currentPatternNum = 0;
+                cg.customPatternMode = true;
             }
             else
             {
-                Debug.LogError("customPatterns is empty");
+                Debug.LogError("Arena pattern is null");
             }
-            cg.customPatternMode = true;
-
-            InvokePrivate<EndlessGrid>(cg, "SetGlowColor", new object[] { true });
-            cg.waveNumberText.transform.parent.parent.gameObject.SetActive(true);
+            if (cg.gridCube == null)
+            {
+                print("Gridcbue is null");
+            }
+            //InvokePrivate<CustomCybergrind>(cg, "SetGlowColor", new object[] { true });
             if (cg.CurrentPatternPool != null && cg.CurrentPatternPool.Length > 0)
             {
                 if (cg.currentPatternNum >= 0 && cg.currentPatternNum < cg.CurrentPatternPool.Length)
                 {
-                    InvokePrivate<EndlessGrid>(cg, "LoadPattern", new object[] { cg.CurrentPatternPool[cg.currentPatternNum] });
+                    cg.LoadPattern(patterns[patternIndex]);
+                    //InvokePrivate<CustomCybergrind>(cg, "LoadPattern", new object[] { cg.CurrentPatternPool[cg.currentPatternNum] });
                 }
                 else
                 {
