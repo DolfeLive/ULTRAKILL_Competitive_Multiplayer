@@ -28,10 +28,6 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
 [ConfigureSingleton(SingletonFlags.NoAutoInstance)]
 public class CustomCybergrind : MonoSingleton<CustomCybergrind>
 {
-    public CustomCybergrind(GameObject gridcube)
-    {
-        this.gridCube = gridcube;
-    }
     #region unimportant_properties
     public bool customPatternMode = false;
     public ArenaPattern[] customPatterns;
@@ -39,13 +35,15 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     public PrefabDatabase prefabs;
     public GameObject gridCube;
     public float offset = 5f;
-    public EndlessCube[][] cubes;
+    public CustomEndlessCube[][] cubes;
     private int incompleteBlocks;
     private ArenaPattern currentPattern;
     public NavMeshSurface nms;
     public int currentPatternNum = -1;
-    private List<GameObject> spawnedPrefabs = new List<GameObject>();
+    public List<GameObject> spawnedPrefabs = new List<GameObject>();
     private int incompletePrefabs;
+    public List<CyberPooledPrefab> jumpPadPool = new();
+    public int jumpPadSelector;
 
     private GoreZone gz;
 
@@ -86,7 +84,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         }
     }
     #endregion
-    public const int ArenaSize = 3;
+    public const int ArenaSize = 32;
     int gridWidth => ArenaSize;
     int gridHeight => ArenaSize;
     float cubeOffset = 2f;
@@ -103,10 +101,10 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         this.nms = base.GetComponent<NavMeshSurface>();
         this.gz = GoreZone.ResolveGoreZone(base.transform);
         
-        this.cubes = new EndlessCube[gridHeight][];
+        this.cubes = new CustomEndlessCube[gridHeight][];
         for (int i = 0; i < gridHeight; i++)
         {
-            this.cubes[i] = new EndlessCube[gridWidth];
+            this.cubes[i] = new CustomEndlessCube[gridWidth];
             for (int j = 0; j < gridWidth; j++)
             {
                 try 
@@ -116,7 +114,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                     {
                         gameObject.SetActive(true);
                         gameObject.transform.localPosition = new Vector3(i * this.offset, 0f, j * this.offset);
-                        EndlessCube cube = gameObject.GetComponent<EndlessCube>();
+                        CustomEndlessCube cube = gameObject.GetComponent<CustomEndlessCube>();
                         if (cube != null)
                         {
                             this.cubes[i][j] = cube;
@@ -219,8 +217,8 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     private List<Material> GetMaterialsFromCubes()
     {
         List<Material> materials = new List<Material>();
-        
-        EndlessCube firstCube = null;
+
+        CustomEndlessCube firstCube = null;
         for (int i = 0; i < gridHeight && firstCube == null; i++)
         {
             for (int j = 0; j < gridWidth && firstCube == null; j++)
@@ -256,7 +254,13 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         
         List<Mesh> submeshes = new List<Mesh>();
         bool materialsAdded = false;
-
+        
+        if (spawnedPrefabs == null)
+        {
+            spawnedPrefabs = new List<GameObject>();
+            Debug.LogWarning("spawnedPrefabs was null and has been initialized");
+        }
+        
         for (int materialIndex = 0; materialIndex < materials.Count; materialIndex++)
         {
             Mesh submesh = new Mesh();
@@ -283,7 +287,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                             continue;
                         }
 
-                        EndlessCube cube = cubes[i][j];
+                        CustomEndlessCube cube = cubes[i][j];
                         if (cube == null)
                         {
                             Debug.LogWarning($"Cube at position [{i}][{j}] is null");
@@ -300,6 +304,12 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                             });
                             cube.MeshRenderer.enabled = false; 
                         }
+                        else
+                        {
+                            if (cube.MeshFilter == null) Debug.LogWarning($"MeshFilter is null on cube [{i}][{j}]");
+                            if (cube.MeshRenderer == null) Debug.LogWarning($"MeshRenderer is null on cube [{i}][{j}]");
+                            if (cube.MeshFilter != null && cube.MeshFilter.sharedMesh == null) Debug.LogWarning($"sharedMesh is null on cube [{i}][{j}]");
+                        }
                     }
                 }
             }
@@ -307,7 +317,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             {
                 Debug.LogError($"Exception in cube processing: {e.Message}\n{e.StackTrace}");
             }
-
+            
             if (materialIndex == 1)
             {
                 if (spawnedPrefabs == null)
@@ -377,6 +387,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             {  
                 Debug.LogWarning($"No combine instances created for material index {materialIndex}.");
             }
+            
         }
 
 
@@ -448,6 +459,125 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         combinedGridStaticMeshFilter.sharedMesh = combinedGridStaticMesh;
     }
 
+    public void OneDone()
+    {
+        jumpPadSelector = 0;
+        incompleteBlocks--;
+        if (incompleteBlocks == 0)
+        {
+
+            if ((bool)gz)
+            {
+                gz.ResetGibs();
+            }
+
+            string[] array = currentPattern.prefabs.Split('\n');
+            if (array.Length >= ArenaSize || array.Length <= ArenaSize)
+            {
+                UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array.Length + " rows instead of " + ArenaSize);
+                return;
+            }
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (array[i].Length >= ArenaSize || array[i].Length <= ArenaSize)
+                {
+                    UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array[i].Length + " elements in row " + i + " instead of " + ArenaSize);
+                    return;
+                }
+
+                for (int j = 0; j < array[i].Length; j++)
+                {
+                    if (Random.Range(0, 10) == 2)
+                    {
+                        cubes[i][j].blockedByPrefab = true;
+                        SpawnOnGrid(prefabs.jumpPad, new Vector2(i, j), prefab: true, enemy: false, CyberPooledType.JumpPad);
+                    }
+
+                    if (array[i][j] == '0')
+                    {
+                        continue;
+                    }
+
+
+                    switch (array[i][j])
+                    {
+                        case 'J':
+                            cubes[i][j].blockedByPrefab = true;
+                            SpawnOnGrid(prefabs.jumpPad, new Vector2(i, j), prefab: true, enemy: false, CyberPooledType.JumpPad);
+                            break;
+                        case 's':
+                            {
+                                cubes[i][j].blockedByPrefab = true;
+                                if (SpawnOnGrid(prefabs.stairs, new Vector2(i, j), prefab: true).TryGetComponent<EndlessStairs>(out var component2))
+                                {
+                                    if (component2.PrimaryMeshRenderer != null && component2.ActivateFirst)
+                                    {
+                                        component2.PrimaryMeshRenderer.enabled = true;
+                                    }
+
+                                    if (component2.SecondaryMeshRenderer != null && component2.ActivateSecond)
+                                    {
+                                        component2.SecondaryMeshRenderer.enabled = true;
+                                    }
+                                }
+
+                                break;
+                            }
+                    }
+                }
+            }
+        }
+
+        TrySetupStaticGridMesh();
+    }
+
+    public GameObject SpawnOnGrid(GameObject obj, Vector2 position, bool prefab = false, bool enemy = false, CyberPooledType poolType = CyberPooledType.None, bool radiant = false)
+    {
+        if (Physics.Raycast(base.transform.position + new Vector3(position.x * offset, 200f, position.y * offset), Vector3.down, out var hitInfo, float.PositiveInfinity, 16777216))
+        {
+            float y = obj.transform.position.y;
+            GameObject gameObject = null;
+            bool flag = false;
+            if (poolType != 0 && poolType == CyberPooledType.JumpPad && jumpPadSelector < jumpPadPool.Count)
+            {
+                CyberPooledPrefab cyberPooledPrefab = jumpPadPool[jumpPadSelector];
+                gameObject = cyberPooledPrefab.gameObject;
+                gameObject.transform.position = hitInfo.point + Vector3.up * y;
+                cyberPooledPrefab.Animator.Start();
+                cyberPooledPrefab.Animator.reverse = false;
+                jumpPadSelector++;
+                flag = true;
+                gameObject.SetActive(value: true);
+            }
+
+            if (!flag)
+            {
+                gameObject = UnityEngine.Object.Instantiate(obj, hitInfo.point + Vector3.up * y, obj.transform.rotation, base.transform);
+            }
+
+            if (prefab)
+            {
+                if (!flag && poolType == CyberPooledType.JumpPad)
+                {
+                    CyberPooledPrefab cyberPooledPrefab2 = gameObject.AddComponent<CyberPooledPrefab>();
+                    jumpPadPool.Add(cyberPooledPrefab2);
+                    jumpPadSelector++;
+                    cyberPooledPrefab2.Index = jumpPadPool.Count - 1;
+                    cyberPooledPrefab2.Type = CyberPooledType.JumpPad;
+                    cyberPooledPrefab2.Animator = gameObject.GetComponent<EndlessPrefabAnimator>();
+                }
+
+                spawnedPrefabs.Add(gameObject);
+                incompletePrefabs++;
+            }
+
+            return gameObject;
+        }
+
+        return null;
+    }
+
     private void UpdatePhysics()
     {
         if (combinedGridStaticObject.TryGetComponent<PhysicsSceneStateEnforcer>(out PhysicsSceneStateEnforcer enforcer))
@@ -478,6 +608,12 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
 
         ProcessPatternRows(pattern, rows);
 
+        foreach (GameObject spawnedPrefab in spawnedPrefabs)
+        {
+            spawnedPrefab.GetComponent<EndlessPrefabAnimator>().reverse = true;
+        }
+        spawnedPrefabs.Clear();
+        
         currentPattern = pattern;
         MakeGridDynamic();
     }
@@ -641,7 +777,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         {
             for (int j = 0; j < gridWidth; j++)
             {
-                EndlessCube cube = cubes[i][j];
+                CustomEndlessCube cube = cubes[i][j];
                 if (cube != null)
                 {
                     cube.MeshRenderer.enabled = true;
