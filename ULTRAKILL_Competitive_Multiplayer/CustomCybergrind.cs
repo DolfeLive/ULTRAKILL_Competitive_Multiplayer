@@ -11,6 +11,19 @@ using Debug = UnityEngine.Debug;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
+/*
+[Info   : Unity Log] CustomCybergrind started
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
+Stack trace:
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.CreateSubmeshes (System.Collections.Generic.List`1[T] materials) (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.SetupStaticGridMesh () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.TrySetupStaticGridMesh () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
+ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.Init () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
+UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
+UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
+ * 
+ */
+
 
 [ConfigureSingleton(SingletonFlags.NoAutoInstance)]
 public class CustomCybergrind : MonoSingleton<CustomCybergrind>
@@ -73,7 +86,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         }
     }
     #endregion
-    public const int ArenaSize = 32;
+    public const int ArenaSize = 3;
     int gridWidth => ArenaSize;
     int gridHeight => ArenaSize;
     float cubeOffset = 2f;
@@ -235,6 +248,12 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
 
     private List<Mesh> CreateSubmeshes(List<Material> materials)
     {
+        if (materials == null || materials.Count == 0)
+        {
+            Debug.LogError("Materials list is null or empty.");
+            return new List<Mesh>();
+        }
+        
         List<Mesh> submeshes = new List<Mesh>();
         bool materialsAdded = false;
 
@@ -242,66 +261,125 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         {
             Mesh submesh = new Mesh();
             submesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            
+
             List<CombineInstance> combineInstances = new List<CombineInstance>();
-            
-            for (int i = 0; i < gridHeight; i++)
+
+            if (cubes == null)
             {
-                for (int j = 0; j < gridWidth; j++)
+                Debug.LogError("Cubes array is null.");
+                return submeshes;
+            }
+
+            try
+            {
+                for (int i = 0; i < gridHeight; i++)
                 {
-                    EndlessCube cube = cubes[i][j];
-                    if (cube != null && cube.MeshFilter != null && cube.MeshRenderer != null)
+                    for (int j = 0; j < gridWidth; j++)
                     {
-                        combineInstances.Add(new CombineInstance
+                        
+                        if (cubes[i] == null)
                         {
-                            transform = cube.MeshRenderer.localToWorldMatrix,
-                            mesh = cube.MeshFilter.sharedMesh,
-                            subMeshIndex = materialIndex
-                        });
-                        cube.MeshRenderer.enabled = false;
+                            Debug.LogWarning($"Row {i} in cubes array is null.");
+                            continue;
+                        }
+
+                        EndlessCube cube = cubes[i][j];
+                        if (cube == null)
+                        {
+                            Debug.LogWarning($"Cube at position [{i}][{j}] is null");
+                            continue;
+                        }
+
+                        if (cube.MeshFilter != null && cube.MeshRenderer != null && cube.MeshFilter.sharedMesh != null)
+                        {
+                            combineInstances.Add(new CombineInstance
+                            {
+                                transform = cube.MeshRenderer.localToWorldMatrix,
+                                mesh = cube.MeshFilter.sharedMesh,
+                                subMeshIndex = materialIndex
+                            });
+                            cube.MeshRenderer.enabled = false; 
+                        }
                     }
                 }
             }
-            
+            catch (Exception e)
+            {
+                Debug.LogError($"Exception in cube processing: {e.Message}\n{e.StackTrace}");
+            }
+
             if (materialIndex == 1)
             {
-                foreach (GameObject prefab in spawnedPrefabs)
+                if (spawnedPrefabs == null)
                 {
-                    if (prefab != null && prefab.TryGetComponent<EndlessStairs>(out EndlessStairs stairs))
+                    Debug.LogWarning("spawnedPrefabs is null, skipping stairs processing");
+                }
+                else
+                {
+                    Debug.Log($"spawnedPrefabs count: {spawnedPrefabs.Count}");
+
+                    foreach (GameObject prefab in spawnedPrefabs)
                     {
-                        if (!materialsAdded)
+                        if (prefab == null)
                         {
-                            AddStairsMaterials(stairs, materials);
-                            materialsAdded = true;
+                            Debug.LogWarning("Skipping null prefab");
+                            continue;
                         }
-                        
-                        if (stairs.ActivateFirst && stairs.PrimaryMeshFilter != null && stairs.PrimaryMeshRenderer != null)
+
+                        bool hasComponent = prefab.TryGetComponent<EndlessStairs>(out EndlessStairs stairs);
+
+                        if (hasComponent)
                         {
-                            combineInstances.Add(new CombineInstance
+
+                            if (!materialsAdded)
                             {
-                                transform = stairs.PrimaryMeshRenderer.localToWorldMatrix,
-                                mesh = stairs.PrimaryMeshFilter.sharedMesh
-                            });
-                            stairs.PrimaryMeshRenderer.enabled = false;
-                        }
-                        
-                        if (stairs.ActivateSecond && stairs.SecondaryMeshFilter != null && stairs.SecondaryMeshRenderer != null)
-                        {
-                            combineInstances.Add(new CombineInstance
+                                try
+                                {
+                                    AddStairsMaterials(stairs, materials);
+                                    materialsAdded = true;
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.LogError($"Exception in AddStairsMaterials: {e.Message}\n{e.StackTrace}");
+                                }
+                            }
+
+                            if (stairs.ActivateFirst && stairs.PrimaryMeshFilter != null && stairs.PrimaryMeshRenderer != null)
                             {
-                                transform = stairs.SecondaryMeshRenderer.localToWorldMatrix,
-                                mesh = stairs.SecondaryMeshFilter.sharedMesh
-                            });
-                            stairs.SecondaryMeshRenderer.enabled = false;
+                                combineInstances.Add(new CombineInstance
+                                {
+                                    transform = stairs.PrimaryMeshRenderer.localToWorldMatrix,
+                                    mesh = stairs.PrimaryMeshFilter.sharedMesh
+                                });
+                                stairs.PrimaryMeshRenderer.enabled = false;
+                            }
+
+                            if (stairs.ActivateSecond && stairs.SecondaryMeshFilter != null && stairs.SecondaryMeshRenderer != null)
+                            {
+                                combineInstances.Add(new CombineInstance
+                                {
+                                    transform = stairs.SecondaryMeshRenderer.localToWorldMatrix,
+                                    mesh = stairs.SecondaryMeshFilter.sharedMesh
+                                });
+                                stairs.SecondaryMeshRenderer.enabled = false;
+                            }
                         }
                     }
                 }
             }
-            
-            submesh.CombineMeshes(combineInstances.ToArray(), true, true);
-            submeshes.Add(submesh);
+
+            if (combineInstances.Count > 0)
+            {
+                submesh.CombineMeshes(combineInstances.ToArray(), true, true);
+                submeshes.Add(submesh);
+            }
+            else
+            {  
+                Debug.LogWarning($"No combine instances created for material index {materialIndex}.");
+            }
         }
-        
+
+
         return submeshes;
     }
 
@@ -332,6 +410,23 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
 
     private void CombineSubmeshes(List<Mesh> submeshes, List<Material> materials)
     {
+        if (combinedGridStaticMesh == null)
+        {
+            Debug.LogError("combinedGridStaticMesh is null!");
+            return;
+        }
+
+        if (combinedGridStaticObject == null)
+        {
+            TrySetupStaticGridMesh();
+        } 
+
+        if (combinedGridStaticMeshRenderer == null || combinedGridStaticObject == null || combinedGridStaticMeshFilter == null)
+        {
+            Debug.LogError($"One or more required components are null! combinedGridStaticMeshRenderer:{combinedGridStaticMeshRenderer == null} | combinedGridStaticObject: {combinedGridStaticObject == null} | combinedGridStaticMeshFilter: {combinedGridStaticMeshFilter == null}" );
+            return;
+        }
+
         CombineInstance[] combineInstances = new CombineInstance[submeshes.Count];
 
         for (int i = 0; i < submeshes.Count; i++)

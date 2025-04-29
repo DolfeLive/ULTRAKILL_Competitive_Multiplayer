@@ -66,7 +66,7 @@ namespace UltraIDK
 
         void AddPatterns()
         {
-            /*
+            
             ArenaPattern arena = ScriptableObject.CreateInstance<ArenaPattern>();
             arena.name = "Arena1";
             arena.heights =
@@ -86,7 +86,7 @@ namespace UltraIDK
 (2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
-            patterns.Add(arena);
+            //patterns.Add(arena);
 
             ArenaPattern arena2 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena2.name = "Arena2";
@@ -107,8 +107,8 @@ namespace UltraIDK
 (2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
-            patterns.Add(arena2);
-            */
+            //patterns.Add(arena2);
+            
             
             string GeneratePattern(int width, int height, int minValue, int maxValue)
             {
@@ -128,20 +128,20 @@ namespace UltraIDK
 
                 return sb.ToString();
             }
-            Task addPatterns = new Task(() =>
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    string pattern = GeneratePattern(32, 32, 0, 5);
-                    ArenaPattern arena = ScriptableObject.CreateInstance<ArenaPattern>();
-                    arena.name = $"randomArena{i}";
-                    arena.heights = pattern;
-                    patterns.Add(arena);
-                }
+            //Task addPatterns = new Task(() =>
+            //{
+            //    for (int i = 0; i < 2; i++)
+            //    {
+                    
+            //    }
                 
-            });
-            addPatterns.Start();
-            
+            //});
+            //addPatterns.Start();
+            string pattern = GeneratePattern(3, 3, 0, 5);
+            ArenaPattern arena3 = ScriptableObject.CreateInstance<ArenaPattern>();
+            arena3.name = $"randomArena1";
+            arena3.heights = pattern;
+            patterns.Add(arena3);
             // string pattern = GeneratePattern(32, 32, 0, 5);            
             // ArenaPattern randomArena = ScriptableObject.CreateInstance<ArenaPattern>();
             // randomArena.name = "randomArena";
@@ -510,7 +510,6 @@ namespace UltraIDK
                 yield break;
             }
 
-
             GameObject arenaGO = cybergrid.gameObject;
             PrefabDatabase prefabs = cybergrid.prefabs;
             GameObject gridCube = cybergrid.gridCube;
@@ -536,14 +535,14 @@ namespace UltraIDK
             }
             
             CustomCybergrind cg = arenaGO.AddComponent<CustomCybergrind>();
+            //cg.combinedGridStaticObject = combinedGridStaticObject;
             cg.gridCube = gridCube; 
             cg.prefabs = prefabs;
             cg.nms = navMeshSurface;
             cg.offset = 5;
             cg.glowMultiplier = 1f;
-            cg.combinedGridStaticObject = combinedGridStaticObject;
-            
             cg.Init();
+            
             
             if (cg == null)
             {
@@ -551,7 +550,7 @@ namespace UltraIDK
                 yield break;
             }
             /*
-            [Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
 Stack trace:
 ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.CreateSubmeshes (System.Collections.Generic.List`1[T] materials) (at <818eee5ee85c4958aefb5380d16abe11>:0)
 ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.SetupStaticGridMesh () (at <818eee5ee85c4958aefb5380d16abe11>:0)
