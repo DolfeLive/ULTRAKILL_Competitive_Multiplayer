@@ -86,7 +86,6 @@ namespace UltraIDK
 (2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
-            //patterns.Add(arena);
 
             ArenaPattern arena2 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena2.name = "Arena2";
@@ -107,7 +106,6 @@ namespace UltraIDK
 (2)(2)(5)(4)(3)(0)(0)(0)(0)(0)(0)(3)(4)(5)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
-            //patterns.Add(arena2);
             
             
             string GeneratePattern(int width, int height, int minValue, int maxValue)
@@ -128,26 +126,14 @@ namespace UltraIDK
 
                 return sb.ToString();
             }
-            //Task addPatterns = new Task(() =>
-            //{
-            //    for (int i = 0; i < 2; i++)
-            //    {
-                    
-            //    }
-                
-            //});
-            //addPatterns.Start();
-            string pattern = GeneratePattern(3, 3, 0, 5);
+            string pattern = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 9);
             ArenaPattern arena3 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena3.name = $"randomArena1";
             arena3.heights = pattern;
+            
+            //patterns.Add(arena);
+            //patterns.Add(arena2);
             patterns.Add(arena3);
-            // string pattern = GeneratePattern(32, 32, 0, 5);            
-            // ArenaPattern randomArena = ScriptableObject.CreateInstance<ArenaPattern>();
-            // randomArena.name = "randomArena";
-            // randomArena.heights = pattern;
-            // patterns.Add(randomArena);
-
         }
 
         void crackedToggleChanged(bool newVal)
@@ -506,7 +492,7 @@ namespace UltraIDK
             EndlessGrid cybergrid = FindFirstObjectByType<EndlessGrid>();
             if (cybergrid == null)
             {
-                Debug.LogError("Cybergrind is null");
+                Debug.LogError("DoCGStuff - Cybergrind is null");
                 yield break;
             }
 
@@ -514,55 +500,46 @@ namespace UltraIDK
             PrefabDatabase prefabs = cybergrid.prefabs;
             GameObject gridCube = cybergrid.gridCube;
             NavMeshSurface navMeshSurface = cybergrid.nms;
+            GameObject combinedGridStaticObject = cybergrid.combinedGridStaticObject;
             EndlessCube[][] Cubes = cybergrid.cubes;
-
             for (int i = 0; i < Cubes.Length; i++)
             {
                 for (int j = 0; j < Cubes[i].Length; j++)
                 {
-                    Destroy(Cubes[i][j]);
+                    DestroyImmediate(Cubes[i][j]);
+                    Debug.Log($"Destroyed: ({i}, {j})");
                 }
             }
 
-            GameObject combinedGridStaticObject = cybergrid.combinedGridStaticObject;
-            float offset = 5f;
-            float glowMult = 1f;
+            EndlessCube cube = gridCube.GetComponent<EndlessCube>();
+            Vector2Int positionOnGrid = cube.positionOnGrid;
+            bool blockedByPrefab = cube.blockedByPrefab;
+            Vector3 targetPos = cube.targetPos;
+            bool active = cube.active;
+            float speed = cube.speed;
+            cube.enabled = false;
+
+            CustomEndlessCube gCube = gridCube.AddComponent<CustomEndlessCube>();
+            gCube.positionOnGrid = positionOnGrid;
+            gCube.blockedByPrefab = blockedByPrefab;
+            gCube.targetPos = targetPos;
+            gCube.active = active;
+            gCube.speed = speed;
             
             DestroyImmediate(cybergrid);
             if (cybergrid == null)
             {
-                Debug.Log("Deletion sucsessful");
+                Debug.Log("cybergrid Deletion sucsessful");
             }
             
             CustomCybergrind cg = arenaGO.AddComponent<CustomCybergrind>();
-            //cg.combinedGridStaticObject = combinedGridStaticObject;
             cg.gridCube = gridCube; 
             cg.prefabs = prefabs;
             cg.nms = navMeshSurface;
             cg.offset = 5;
             cg.glowMultiplier = 1f;
-            cg.Init();
-            
-            
-            if (cg == null)
-            {
-                Debug.LogError("cg creation failed!");
-                yield break;
-            }
-            /*
-[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
-Stack trace:
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.CreateSubmeshes (System.Collections.Generic.List`1[T] materials) (at <818eee5ee85c4958aefb5380d16abe11>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.SetupStaticGridMesh () (at <818eee5ee85c4958aefb5380d16abe11>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.TrySetupStaticGridMesh () (at <818eee5ee85c4958aefb5380d16abe11>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.Init () (at <818eee5ee85c4958aefb5380d16abe11>:0)
-UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <818eee5ee85c4958aefb5380d16abe11>:0)
-UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
-*/
-            
-            
-            print($"cubes: {cg.cubes}");
-            
+
+
             if (patterns[patternIndex] != null)
             {
                 cg.customPatterns = new ArenaPattern[1];
@@ -574,27 +551,31 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
             {
                 Debug.LogError("Arena pattern is null");
             }
-            if (cg.gridCube == null)
-            {
-                print("Gridcbue is null");
-            }
-            //InvokePrivate<CustomCybergrind>(cg, "SetGlowColor", new object[] { true });
+
+            cg.spawnedPrefabs = new List<GameObject>();
+
+            cg.Init();
+            
+            yield return null;
+            
             if (cg.CurrentPatternPool != null && cg.CurrentPatternPool.Length > 0)
             {
-                if (cg.currentPatternNum >= 0 && cg.currentPatternNum < cg.CurrentPatternPool.Length)
+                try
                 {
                     cg.LoadPattern(patterns[patternIndex]);
-                    //InvokePrivate<CustomCybergrind>(cg, "LoadPattern", new object[] { cg.CurrentPatternPool[cg.currentPatternNum] });
+                    Debug.Log("Pattern loaded successfully");
                 }
-                else
+                catch (Exception e)
                 {
-                    Debug.LogError("currentPatternNum is out of bounds");
+                    Debug.LogError($"Error loading pattern: {e.Message}\n{e.StackTrace}");
                 }
             }
             else
             {
                 Debug.LogError("CurrentPatternPool is either null or empty");
             }
+
+            Debug.Log("DoCGStuff completed");
         }
 
         void OpenMultiMenu()
