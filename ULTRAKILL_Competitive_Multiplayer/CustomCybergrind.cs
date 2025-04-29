@@ -628,6 +628,13 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         return heights;
     }
 
+    public void OnePrefabDone()
+    {
+        incompletePrefabs--;
+        
+        TrySetupStaticGridMesh();
+    }
+
     public void MakeGridDynamic()
     {
         for (int i = 0; i < gridHeight; i++)
