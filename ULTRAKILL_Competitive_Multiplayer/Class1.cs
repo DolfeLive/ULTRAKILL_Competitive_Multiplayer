@@ -110,14 +110,13 @@ namespace UltraIDK
             
             string GeneratePattern(int width, int height, int minValue, int maxValue)
             {
-                System.Random rand = new System.Random();
                 StringBuilder sb = new StringBuilder();
 
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
-                        int number = rand.Next(minValue, maxValue + 1);
+                        int number = UnityEngine.Random.Range(minValue, maxValue);
                         sb.Append($"({number})");
                     }
                     if (y != height - 1)
@@ -130,10 +129,18 @@ namespace UltraIDK
             ArenaPattern arena3 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena3.name = $"randomArena1";
             arena3.heights = pattern;
-            
+            //arena3.prefabs = pattern;
+
+            string pattern2 = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 9);
+            ArenaPattern arena4 = ScriptableObject.CreateInstance<ArenaPattern>();
+            arena4.name = $"randomArena2";
+            arena4.heights = pattern2;
+            //arena4.prefabs = pattern2;
+
             //patterns.Add(arena);
             //patterns.Add(arena2);
             patterns.Add(arena3);
+            patterns.Add(arena4);
         }
 
         void crackedToggleChanged(bool newVal)
@@ -506,10 +513,11 @@ namespace UltraIDK
             {
                 for (int j = 0; j < Cubes[i].Length; j++)
                 {
-                    DestroyImmediate(Cubes[i][j]);
+                    DestroyImmediate(Cubes[i][j].gameObject);
                     Debug.Log($"Destroyed: ({i}, {j})");
                 }
             }
+            DestroyImmediate(combinedGridStaticObject);
 
             EndlessCube cube = gridCube.GetComponent<EndlessCube>();
             Vector2Int positionOnGrid = cube.positionOnGrid;

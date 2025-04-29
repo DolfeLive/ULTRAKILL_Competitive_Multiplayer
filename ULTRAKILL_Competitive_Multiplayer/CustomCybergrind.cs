@@ -84,7 +84,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         }
     }
     #endregion
-    public const int ArenaSize = 50;
+    public const int ArenaSize = 32;
     int gridWidth => ArenaSize;
     int gridHeight => ArenaSize;
     float cubeOffset = 2f;
@@ -472,26 +472,33 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             }
 
             string[] array = currentPattern.prefabs.Split('\n');
-            if (array.Length != 16)
+            if (array.Length >= ArenaSize || array.Length <= ArenaSize)
             {
-                UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array.Length + " rows instead of " + 16);
+                UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array.Length + " rows instead of " + ArenaSize);
                 return;
             }
 
             for (int i = 0; i < array.Length; i++)
             {
-                if (array[i].Length != 16)
+                if (array[i].Length >= ArenaSize || array[i].Length <= ArenaSize)
                 {
-                    UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array[i].Length + " elements in row " + i + " instead of " + 16);
+                    UnityEngine.Debug.LogError("[Prefabs] Pattern \"" + currentPattern.name + "\" has " + array[i].Length + " elements in row " + i + " instead of " + ArenaSize);
                     return;
                 }
 
                 for (int j = 0; j < array[i].Length; j++)
                 {
+                    if (Random.Range(0, 10) == 2)
+                    {
+                        cubes[i][j].blockedByPrefab = true;
+                        SpawnOnGrid(prefabs.jumpPad, new Vector2(i, j), prefab: true, enemy: false, CyberPooledType.JumpPad);
+                    }
+
                     if (array[i][j] == '0')
                     {
                         continue;
                     }
+
 
                     switch (array[i][j])
                     {
