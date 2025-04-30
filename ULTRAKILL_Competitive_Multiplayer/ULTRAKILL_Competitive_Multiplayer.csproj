@@ -72,6 +72,9 @@
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>C:\UltrakillDeps\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>C:\UltrakillDeps\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>C:\UltrakillDeps\UnityEngine.UI.dll</HintPath>
     </Reference>

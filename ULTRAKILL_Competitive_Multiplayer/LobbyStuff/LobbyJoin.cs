@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine.UI;
 using UnityEngine;
-using Clogger = UltraIDK.Logger;
+using Clogger = ULTRAKILL_Competitive_Multiplayer.Logger;
 
-namespace UltraIDK
+namespace ULTRAKILL_Competitive_Multiplayer;
+
+public class LobbyJoin : MonoBehaviour
 {
-    public class LobbyJoin : MonoBehaviour
+    public async void JoinLobby()
     {
-        public async void JoinLobby()
-        {
-            Debug.Log("Join lobby button pressed!");
+        Debug.Log("Join lobby button pressed!");
 
-            if (ulong.TryParse(transform.Find("CodeInput").GetComponent<InputField>().text, out ulong lobbyId))
-            {
-                MultiplayerUtil.LobbyManager.JoinLobbyWithID(lobbyId);
-            }
-            else
-            {
-                Clogger.LogError("Invalid lobby ID input. Please enter a valid number.");
-            }
+        if (ulong.TryParse(transform.Find("CodeInput").GetComponent<InputField>().text, out ulong lobbyId))
+        {
+            MultiplayerUtil.LobbyManager.JoinLobbyWithID(lobbyId);
+        }
+        else
+        {
+            Clogger.LogError("Invalid lobby ID input. Please enter a valid number.");
         }
     }
 }

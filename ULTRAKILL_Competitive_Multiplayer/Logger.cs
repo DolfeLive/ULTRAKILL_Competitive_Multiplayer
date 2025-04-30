@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace UltraIDK;
+namespace ULTRAKILL_Competitive_Multiplayer;
 
 public static class Logger
 {

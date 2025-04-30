@@ -11,19 +11,6 @@ using Debug = UnityEngine.Debug;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
-/*
-[Info   : Unity Log] CustomCybergrind started
-[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
-Stack trace:
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.CreateSubmeshes (System.Collections.Generic.List`1[T] materials) (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.SetupStaticGridMesh () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.TrySetupStaticGridMesh () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
-ULTRAKILL_Competitive_Multiplayer.CustomCybergrind.Init () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
-UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <f2be90e38e574a7d8a5d49aeacff2935>:0)
-UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
- * 
- */
-
 
 [ConfigureSingleton(SingletonFlags.NoAutoInstance)]
 public class CustomCybergrind : MonoSingleton<CustomCybergrind>
