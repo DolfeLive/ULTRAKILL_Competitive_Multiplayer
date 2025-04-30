@@ -161,13 +161,13 @@ Jsss000000000000";
 
                 return sb.ToString();
             }
-            string pattern = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 3);
+            string pattern = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 0, 6);
             ArenaPattern arena3 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena3.name = $"randomArena1";
             arena3.heights = pattern;
             //arena3.prefabs = pattern;
 
-            string pattern2 = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 3);
+            string pattern2 = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 0, 6);
             ArenaPattern arena4 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena4.name = $"randomArena2";
             arena4.heights = pattern2;
@@ -175,7 +175,7 @@ Jsss000000000000";
 
             //patterns.Add(arena);
             //patterns.Add(arena2);
-            patterns.Add(stairsTest);
+            //patterns.Add(stairsTest);
             patterns.Add(arena3);
             patterns.Add(arena4);
         }
@@ -537,8 +537,9 @@ Jsss000000000000";
             if (spawnPos == null)
             {
                 Debug.Log("Spawnpos was null");
-            }    
-            nm.transform.position = spawnPos.transform.position;
+            } 
+            else
+                nm.transform.position = spawnPos.transform.position;
 
             
             EndlessGrid cybergrid = FindFirstObjectByType<EndlessGrid>();
@@ -559,7 +560,7 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
              */
 
             // Instantiate and modify jumpPad
-            GameObject jumpPad = Instantiate(prefabs.jumpPad, new Vector3(0, -500f, 0), Quaternion.identity);
+            GameObject jumpPad = prefabs.jumpPad; //Instantiate(prefabs.jumpPad, new Vector3(0, -500f, 0), Quaternion.identity);
             Debug.Log("[DEBUG] jumpPad instantiated: " + (jumpPad != null));
             jumpPad.name = "JUMPPADTEMPLATE";
             // Cache animator properties
@@ -595,7 +596,7 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
             prefabs.jumpPad = jumpPad;
 
             // Instantiate and modify stairs
-            GameObject stairs = Instantiate(prefabs.stairs, new Vector3(0, -500f, 0), Quaternion.identity);
+            GameObject stairs = prefabs.stairs;//Instantiate(prefabs.stairs, new Vector3(0, -500f, 0), Quaternion.identity);
             Debug.Log("[DEBUG] stairs instantiated: " + (stairs != null));
             stairs.name = "STAIRSTEMPLATE";
             // Cache animator properties

@@ -84,7 +84,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         }
     }
     #endregion
-    public const int ArenaSize = 16;
+    public const int ArenaSize = 64;
     int gridWidth => ArenaSize;
     int gridHeight => ArenaSize;
     float cubeOffset = 5f;
@@ -185,7 +185,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         submeshes.Clear();
         
         stopwatch.Stop();
-        Debug.Log($"Combined arena mesh in {stopwatch.ElapsedMilliseconds} ms");
+        Debug.Log($"Combined arena mesh in {stopwatch.Elapsed.TotalMilliseconds:N5} ms");
         
         UpdatePhysics();
     }
@@ -204,7 +204,6 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         if (combinedGridStaticMesh == null)
         {
             combinedGridStaticMesh = new Mesh();
-            // Fix for vertex count exceeding 65535 limit
             combinedGridStaticMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         }
         else
@@ -326,8 +325,6 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                 }
                 else
                 {
-                    Debug.Log($"spawnedPrefabs count: {spawnedPrefabs.Count}");
-
                     foreach (GameObject prefab in spawnedPrefabs)
                     {
                         if (prefab == null)
@@ -497,35 +494,6 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
 
                 for (int j = 0; j < array[i].Length; j++)
                 {
-                    //int rand = Random.Range(0, 20);
-                    //if (rand == 2)
-                    //{
-                    //    cubes[i][j].blockedByPrefab = true;
-                    //    SpawnOnGrid(prefabs.jumpPad, new Vector2(i, j), prefab: true, enemy: false, CyberPooledType.JumpPad);
-                    //}
-                    //else if (rand != 999)
-                    //{
-                    //    cubes[i][j].blockedByPrefab = true;
-                    //    if (SpawnOnGrid(prefabs.stairs, new Vector2(i, j), prefab: true).TryGetComponent<CustomEndlessStairs>(out var component2))
-                    //    {
-                    //        //print($"prefabs: {prefabs.stairs.}")
-                    //        PrintHierarchy(component2.transform, 0);
-                    //        print($"EndlessStairs primMeshRen: " +
-                    //            $"{component2.PrimaryMeshRenderer}, {component2.ActivateFirst} | " +
-                    //            $"Secondary: {component2.SecondaryMeshRenderer}, {component2.ActivateSecond}"
-                    //        );
-                    //        if (component2.PrimaryMeshRenderer != null && component2.ActivateFirst)
-                    //        {
-                    //            component2.PrimaryMeshRenderer.enabled = true;
-                    //        }
-
-                    //        if (component2.SecondaryMeshRenderer != null && component2.ActivateSecond)
-                    //        {
-                    //            component2.SecondaryMeshRenderer.enabled = true;
-                    //        }
-                    //    }
-                    //}
-
                     if (array[i][j] == '0')
                     {
                         continue;
@@ -559,6 +527,35 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                     }
                 }
             }
+
+            for (int i = 0; i < ArenaSize; i++)
+            {
+                for (int j = 0; j < ArenaSize; j++)
+                {
+                    int rand = Random.Range(0, 20);
+                    if (rand == 2)
+                    {
+                        cubes[i][j].blockedByPrefab = true;
+                        SpawnOnGrid(prefabs.jumpPad, new Vector2(i, j), prefab: true, enemy: false, CyberPooledType.JumpPad);
+                    }
+                    else if (rand == 3)
+                    {
+                        cubes[i][j].blockedByPrefab = true;
+                        if (SpawnOnGrid(prefabs.stairs, new Vector2(i, j), prefab: true).TryGetComponent<CustomEndlessStairs>(out var component2))
+                        {
+                            if (component2.PrimaryMeshRenderer != null && component2.ActivateFirst)
+                            {
+                                component2.PrimaryMeshRenderer.enabled = true;
+                            }
+
+                            if (component2.SecondaryMeshRenderer != null && component2.ActivateSecond)
+                            {
+                                component2.SecondaryMeshRenderer.enabled = true;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         TrySetupStaticGridMesh();
@@ -568,7 +565,6 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     {
         if (Physics.Raycast(base.transform.position + new Vector3(position.x * offset, 200f, position.y * offset), Vector3.down, out var hitInfo, float.PositiveInfinity, 16777216))
         {
-            Debug.Log($"Spawning on grid: {obj.name}");
             float y = obj.transform.position.y;
             GameObject gameObject = null;
             bool flag = false;
@@ -577,16 +573,25 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                 CustomCyberPooledPrefab cyberPooledPrefab = jumpPadPool[jumpPadSelector];
                 gameObject = cyberPooledPrefab.gameObject;
                 gameObject.transform.position = hitInfo.point + Vector3.up * y;
-                cyberPooledPrefab.Animator.Start();
-                cyberPooledPrefab.Animator.reverse = false;
+
+                if (cyberPooledPrefab.Animator != null)
+                {
+                    cyberPooledPrefab.Animator.Start();
+                    cyberPooledPrefab.Animator.reverse = false;
+                }
+                else
+                {
+                    Debug.LogWarning("JumpPad animator is null");
+                }
+
                 jumpPadSelector++;
                 flag = true;
                 gameObject.SetActive(value: true);
             }
 
             if (!flag)
-                gameObject = Instantiate(obj, hitInfo.point + Vector3.up * y, obj.transform.rotation, base.transform);
             {
+                gameObject = Instantiate(obj, hitInfo.point + Vector3.up * y, obj.transform.rotation, base.transform);
             }
 
             if (prefab)
@@ -599,6 +604,43 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
                     cyberPooledPrefab2.Index = jumpPadPool.Count - 1;
                     cyberPooledPrefab2.Type = CyberPooledType.JumpPad;
                     cyberPooledPrefab2.Animator = gameObject.GetComponent<CustomEndlessPrefabAnimator>();
+                }
+                
+                CustomEndlessStairs stairs = gameObject.GetComponent<CustomEndlessStairs>();
+                if (stairs != null)
+                {
+                    if (stairs.PrimaryMeshRenderer == null || stairs.SecondaryMeshRenderer == null)
+                    {
+                        MeshRenderer[] renderers = gameObject.GetComponentsInChildren<MeshRenderer>(true);
+                        MeshFilter[] filters = gameObject.GetComponentsInChildren<MeshFilter>(true);
+
+                        if (renderers.Length >= 1 && filters.Length >= 1)
+                        {
+                            if (stairs.PrimaryMeshRenderer == null)
+                            {
+                                stairs.primaryMeshRenderer = renderers[0];
+                                stairs.primaryMeshFilter = filters[0];
+                                stairs.activateFirst = true;
+                            }
+
+                            if (renderers.Length >= 2 && filters.Length >= 2 && stairs.SecondaryMeshRenderer == null)
+                            {
+                                stairs.secondaryMeshRenderer = renderers[1];
+                                stairs.secondaryMeshFilter = filters[1];
+                                stairs.activateSecond = true;
+                            }
+                        }
+                    }
+
+                    if (stairs.PrimaryMeshRenderer != null && stairs.ActivateFirst)
+                    {
+                        stairs.PrimaryMeshRenderer.enabled = true;
+                    }
+
+                    if (stairs.SecondaryMeshRenderer != null && stairs.ActivateSecond)
+                    {
+                        stairs.SecondaryMeshRenderer.enabled = true;
+                    }
                 }
 
                 spawnedPrefabs.Add(gameObject);

@@ -45,7 +45,6 @@ public class CustomEndlessStairs : MonoBehaviour
 
     public void Start()
     {
-        print("customendlessstairs start ran");
         lmask = 16777216;
         primaryStairs = base.transform.GetChild(0);
         secondaryStairs = base.transform.GetChild(1);
