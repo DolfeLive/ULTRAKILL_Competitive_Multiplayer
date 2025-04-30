@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
-
 public class CustomEndlessStairs : MonoBehaviour
 {
     [SerializeField]
@@ -46,6 +45,7 @@ public class CustomEndlessStairs : MonoBehaviour
 
     public void Start()
     {
+        print("customendlessstairs start ran");
         lmask = 16777216;
         primaryStairs = base.transform.GetChild(0);
         secondaryStairs = base.transform.GetChild(1);
@@ -139,7 +139,8 @@ public class CustomEndlessStairs : MonoBehaviour
                 secondaryStairs.position = Vector3.MoveTowards(secondaryStairs.position, base.transform.position, Time.deltaTime * 2f + 5f * Vector3.Distance(secondaryStairs.position, base.transform.position) * Time.deltaTime);
             }
 
-            if ((!activateFirst || primaryStairs.position == base.transform.position) && (!activateSecond || secondaryStairs.position == base.transform.position))
+            CustomCybergrind parentCybergrind = GetComponentInParent<CustomCybergrind>();
+            if ((!activateFirst || primaryStairs.position == base.transform.position) && (!activateSecond || secondaryStairs.position == base.transform.position) && parentCybergrind != null)
             {
                 moving = false;
                 GetComponentInParent<CustomCybergrind>().OnePrefabDone();

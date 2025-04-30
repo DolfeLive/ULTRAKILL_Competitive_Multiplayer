@@ -17,13 +17,13 @@ public class CustomEndlessPrefabAnimator : MonoBehaviour
 
     public CustomCybergrind eg;
 
-    public CyberPooledPrefab pooledId;
+    public CustomCyberPooledPrefab pooledId;
 
     public void Start()
     {
         if (!pooledId)
         {
-            pooledId = GetComponent<CyberPooledPrefab>();
+            pooledId = GetComponent<CustomCyberPooledPrefab>();
         }
 
         origPos = base.transform.position;
@@ -43,7 +43,10 @@ public class CustomEndlessPrefabAnimator : MonoBehaviour
             {
                 moving = false;
                 eg = GetComponentInParent<CustomCybergrind>();
-                eg.OnePrefabDone();
+                if (eg != null)
+                {
+                    eg.OnePrefabDone();
+                }
             }
         }
         else
@@ -52,11 +55,10 @@ public class CustomEndlessPrefabAnimator : MonoBehaviour
             {
                 return;
             }
-
             base.transform.position = Vector3.MoveTowards(base.transform.position, origPos - Vector3.up * 20f, Time.deltaTime * 2f + 5f * Vector3.Distance(base.transform.position, origPos) * Time.deltaTime);
             if (base.transform.position == origPos - Vector3.up * 20f)
             {
-                if ((bool)pooledId)
+                if (pooledId != null)
                 {
                     base.gameObject.SetActive(value: false);
                 }

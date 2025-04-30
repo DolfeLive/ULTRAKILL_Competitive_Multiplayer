@@ -107,7 +107,43 @@ namespace UltraIDK
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)
 (2)(2)(2)(2)(1)(1)(0)(0)(0)(0)(1)(1)(2)(2)(2)(2)";
             
-            
+            ArenaPattern stairsTest = ScriptableObject.CreateInstance<ArenaPattern>();
+            stairsTest.name = "Stairs test";
+            stairsTest.heights =
+@"(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(2)(4)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)
+(3)(2)(1)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)(0)";
+            stairsTest.prefabs =
+@"0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+0000000000000000
+00JJ000000000000
+000JJ00000000000
+s000JJ0000000000
+s000000000000000
+sJ00000000000000
+Jsss000000000000";
+
             string GeneratePattern(int width, int height, int minValue, int maxValue)
             {
                 StringBuilder sb = new StringBuilder();
@@ -125,13 +161,13 @@ namespace UltraIDK
 
                 return sb.ToString();
             }
-            string pattern = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 9);
+            string pattern = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 3);
             ArenaPattern arena3 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena3.name = $"randomArena1";
             arena3.heights = pattern;
             //arena3.prefabs = pattern;
 
-            string pattern2 = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 9);
+            string pattern2 = GeneratePattern(CustomCybergrind.ArenaSize, CustomCybergrind.ArenaSize, 1, 3);
             ArenaPattern arena4 = ScriptableObject.CreateInstance<ArenaPattern>();
             arena4.name = $"randomArena2";
             arena4.heights = pattern2;
@@ -139,6 +175,7 @@ namespace UltraIDK
 
             //patterns.Add(arena);
             //patterns.Add(arena2);
+            patterns.Add(stairsTest);
             patterns.Add(arena3);
             patterns.Add(arena4);
         }
@@ -494,8 +531,16 @@ namespace UltraIDK
 
         IEnumerator DoCGStuff()
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.4f);
 
+            Transform spawnPos = transform.Find("/SPAWNPOSITION");
+            if (spawnPos == null)
+            {
+                Debug.Log("Spawnpos was null");
+            }    
+            nm.transform.position = spawnPos.transform.position;
+
+            
             EndlessGrid cybergrid = FindFirstObjectByType<EndlessGrid>();
             if (cybergrid == null)
             {
@@ -505,6 +550,109 @@ namespace UltraIDK
 
             GameObject arenaGO = cybergrid.gameObject;
             PrefabDatabase prefabs = cybergrid.prefabs;
+
+            /*
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
+Stack trace:
+UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <b501d85f48634232aadd00cbebdb354d>:0)
+UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
+             */
+
+            // Instantiate and modify jumpPad
+            GameObject jumpPad = Instantiate(prefabs.jumpPad, new Vector3(0, -500f, 0), Quaternion.identity);
+            Debug.Log("[DEBUG] jumpPad instantiated: " + (jumpPad != null));
+            jumpPad.name = "JUMPPADTEMPLATE";
+            // Cache animator properties
+            EndlessPrefabAnimator originalAnimator = jumpPad.GetComponent<EndlessPrefabAnimator>();
+            Debug.Log("[DEBUG] originalAnimator: " + (originalAnimator != null));
+
+            bool reverse = originalAnimator.reverse;
+            bool reverseOnly = originalAnimator.reverseOnly;
+
+            //Debug.Log("[DEBUG] originalAnimator.pooledId: " + (originalAnimator.pooledId != null));
+            //if (originalAnimator.pooledId != null)
+            //{
+            //    CyberPooledType jumpPadType = originalAnimator.pooledId.Type;
+            //    int jumpPadIndex = originalAnimator.pooledId.Index;
+            //}
+            // Replace components
+            DestroyImmediate(originalAnimator);
+            CustomEndlessPrefabAnimator CEPA = jumpPad.AddComponent<CustomEndlessPrefabAnimator>();
+            CEPA.reverse = reverse;
+            CEPA.reverseOnly = reverseOnly;
+
+            //Debug.Log("[DEBUG] CEPA.pooledId: " + (CEPA.pooledId != null));
+            //CEPA.pooledId.Animator = CEPA;
+            //CEPA.pooledId.Type = jumpPadType;
+            //CEPA.pooledId.Index = jumpPadIndex;
+
+            // Add and assign CustomCyberPooledPrefab
+            //CustomCyberPooledPrefab customCPP = jumpPad.AddComponent<CustomCyberPooledPrefab>();
+            //customCPP.Type = jumpPadType;
+            //customCPP.Index = jumpPadIndex;
+            //customCPP.Animator = CEPA;
+
+            prefabs.jumpPad = jumpPad;
+
+            // Instantiate and modify stairs
+            GameObject stairs = Instantiate(prefabs.stairs, new Vector3(0, -500f, 0), Quaternion.identity);
+            Debug.Log("[DEBUG] stairs instantiated: " + (stairs != null));
+            stairs.name = "STAIRSTEMPLATE";
+            // Cache animator properties
+            EndlessPrefabAnimator stairsAnimator = stairs.GetComponent<EndlessPrefabAnimator>();
+            Debug.Log("[DEBUG] stairsAnimator: " + (stairsAnimator != null));
+
+            bool stairsReverse = stairsAnimator.reverse;
+            bool stairsReverseOnly = stairsAnimator.reverseOnly;
+
+            //Debug.Log("[DEBUG] stairsAnimator.pooledId: " + (stairsAnimator.pooledId != null));
+            //CyberPooledType stairsType = stairsAnimator.pooledId.Type;
+            //int stairsIndex = stairsAnimator.pooledId.Index;
+
+            // Replace components
+            DestroyImmediate(stairsAnimator);
+            CustomEndlessPrefabAnimator stairsCEPA = stairs.AddComponent<CustomEndlessPrefabAnimator>();
+            stairsCEPA.reverse = stairsReverse;
+            stairsCEPA.reverseOnly = stairsReverseOnly;
+
+            //Debug.Log("[DEBUG] stairsCEPA.pooledId: " + (stairsCEPA.pooledId != null));
+            //if (originalAnimator.pooledId != null)
+            //{
+            //    stairsCEPA.pooledId.Index = stairsIndex;
+            //    stairsCEPA.pooledId.Animator = stairsCEPA;
+            //    stairsCEPA.pooledId.Type = stairsType;
+
+            //    CustomCyberPooledPrefab stairsCPP = stairs.AddComponent<CustomCyberPooledPrefab>();
+            //    stairsCPP.Type = stairsType;
+            //    stairsCPP.Index = stairsIndex;
+            //    stairsCPP.Animator = stairsCEPA;
+            //}
+
+            // Replace EndlessStairs with CustomEndlessStairs
+            EndlessStairs oldStairs = stairs.GetComponent<EndlessStairs>();
+            Debug.Log("[DEBUG] oldStairs: " + (oldStairs != null));
+
+            MeshRenderer primaryRenderer = oldStairs.primaryMeshRenderer;
+            MeshRenderer secondaryRenderer = oldStairs.secondaryMeshRenderer;
+            MeshFilter primaryFilter = oldStairs.primaryMeshFilter;
+            MeshFilter secondaryFilter = oldStairs.secondaryMeshFilter;
+            Transform primaryStairs = oldStairs.primaryStairs;
+            Transform SecondaryStairs = oldStairs.secondaryStairs;
+
+            DestroyImmediate(oldStairs);
+
+            CustomEndlessStairs newStairs = stairs.AddComponent<CustomEndlessStairs>();
+            newStairs.primaryMeshRenderer = primaryRenderer;
+            newStairs.secondaryMeshRenderer = secondaryRenderer;
+            newStairs.primaryMeshFilter = primaryFilter;
+            newStairs.secondaryMeshFilter = secondaryFilter;
+            newStairs.primaryStairs = primaryStairs;
+            newStairs.secondaryStairs = SecondaryStairs;
+
+            prefabs.stairs = stairs;
+
+
+
             GameObject gridCube = cybergrid.gridCube;
             NavMeshSurface navMeshSurface = cybergrid.nms;
             GameObject combinedGridStaticObject = cybergrid.combinedGridStaticObject;
@@ -514,7 +662,6 @@ namespace UltraIDK
                 for (int j = 0; j < Cubes[i].Length; j++)
                 {
                     DestroyImmediate(Cubes[i][j].gameObject);
-                    Debug.Log($"Destroyed: ({i}, {j})");
                 }
             }
             DestroyImmediate(combinedGridStaticObject);
@@ -526,6 +673,7 @@ namespace UltraIDK
             bool active = cube.active;
             float speed = cube.speed;
             cube.enabled = false;
+
 
             CustomEndlessCube gCube = gridCube.AddComponent<CustomEndlessCube>();
             gCube.positionOnGrid = positionOnGrid;
