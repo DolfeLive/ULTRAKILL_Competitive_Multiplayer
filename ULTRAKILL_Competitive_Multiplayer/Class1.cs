@@ -244,38 +244,30 @@ Jsss000000000000";
     {
         Debug.Log("=== RESPAWN SEQUENCE STARTED ===");
 
-        Debug.Log("Setting CameraController.activated");
         if (CameraController.Instance != null)
         {
             CameraController.Instance.activated = true;
-            Debug.Log("CameraController.activated set to true");
         }
         else
             Debug.LogError("CameraController.Instance is null");
 
-        Debug.Log("Enabling NewMovement component");
         if (this.nm != null)
         {
             this.nm.enabled = true;
-            Debug.Log("NewMovement.enabled set to true");
         }
         else
             Debug.LogError("this.nm reference is null");
 
-        Debug.Log("Setting NewMovement.activated");
         if (nm != null)
         {
             nm.activated = true;
-            Debug.Log("nm.activated set to true");
         }
         else
             Debug.LogError("nm reference is null");
 
-        Debug.Log("Setting camera occlusion culling");
         if (CameraController.Instance != null && CameraController.Instance.cam != null)
         {
             CameraController.Instance.cam.useOcclusionCulling = true;
-            Debug.Log("Camera occlusion culling enabled");
         }
         else
             Debug.LogError("Camera reference issue: " +
@@ -290,45 +282,34 @@ Jsss000000000000";
         deaths++;
         Debug.Log($"Death counter increased to {deaths}");
 
-        Debug.Log("Attempting to stop slide");
         try
         {
             nm.StopSlide();
-            Debug.Log("Slide stopped successfully");
         }
         catch (Exception ex)
         {
             Debug.LogError($"Error stopping slide: {ex.Message}");
         }
 
-        Debug.Log("Setting player health stats");
         nm.hp = 150;
         nm.boostCharge = 299f;
         nm.antiHp = 0f;
         nm.antiHpCooldown = 0f;
-        Debug.Log($"Health set to {nm.hp}, boost charge to {nm.boostCharge}");
 
-        Debug.Log("Setting rigidbody constraints");
         if (nm.rb != null)
         {
             nm.rb.constraints = nm.defaultRBConstraints;
-            Debug.Log("Rigidbody constraints reset");
         }
         else
             Debug.LogWarning("Player rigidbody is null");
 
-        Debug.Log("Handling death sequence");
         try
         {
-            Debug.Log("Attempting to access deathSequence");
             var deathSequence = nm.deathSequence;
-            Debug.Log($"deathSequence reference obtained: {(deathSequence != null ? "Valid" : "Null")}");
 
             if (deathSequence != null && deathSequence.gameObject != null)
             {
-                Debug.Log("Disabling deathSequence GameObject");
                 deathSequence.gameObject.SetActive(false);
-                Debug.Log("deathSequence GameObject disabled");
             }
             else
             {
@@ -349,89 +330,68 @@ Jsss000000000000";
         //Shader.SetGlobalFloat("_Sharpness", 0);
         //Shader.SetGlobalFloat("_Deathness", 0);
 
-        Debug.Log("Enabling character controller");
         if (nm.cc != null)
         {
             nm.cc.enabled = true;
-            Debug.Log("Character controller enabled");
         }
         else
             Debug.LogWarning("Character controller is null");
 
-        Debug.Log("Resetting power meter");
         if (PowerUpMeter.Instance != null)
         {
             PowerUpMeter.Instance.juice = 0f;
-            Debug.Log("Power meter juice reset to 0");
         }
         else
             Debug.LogWarning("PowerUpMeter.Instance is null");
 
-        Debug.Log("Setting up weapons");
         GunControl gunc = nm != null ? nm.GetComponentInChildren<GunControl>() : null;
-        Debug.Log($"GunControl component {(gunc != null ? "found" : "not found")}");
         if (gunc != null)
         {
             gunc.YesWeapon();
-            Debug.Log("Weapons enabled");
         }
         else
             Debug.LogWarning("GunControl component not found");
 
-        Debug.Log("Setting UI and player state");
         if (nm.screenHud != null)
         {
             nm.screenHud.SetActive(false);
-            Debug.Log("Screen HUD disabled");
         }
         else
             Debug.LogWarning("screenHud is null");
 
         nm.dead = false;
-        Debug.Log("Player marked as not dead");
 
-        Debug.Log("Setting time controller");
         if (TimeController.Instance != null)
         {
             TimeController.Instance.controlPitch = true;
-            Debug.Log("Time controller pitch control enabled");
         }
         else
             Debug.LogWarning("TimeController.Instance is null");
 
-        Debug.Log("Handling hook arm");
         if (HookArm.Instance != null)
         {
             HookArm.Instance.Cancel();
-            Debug.Log("Hook arm canceled");
         }
         else
             Debug.LogWarning("HookArm.Instance is null");
 
-        Debug.Log("Setting up punch mechanics");
         if (nm.punch != null)
         {
             nm.punch.activated = true;
-            Debug.Log("Punch activated");
             nm.punch.YesFist();
-            Debug.Log("Fist enabled");
         } 
         else
             Debug.LogWarning("Player punch component is null");
 
         nm.slowMode = false;
-        Debug.Log("Slow mode disabled");
-
-        Debug.Log("Setting up weapon charges");
+        
         if (WeaponCharges.Instance != null)
         {
             WeaponCharges.Instance.MaxCharges();
-            Debug.Log("Weapon charges maximized");
 
             if (WeaponCharges.Instance.rocketLauncher != null)
             {
                 WeaponCharges.Instance.rocketLauncher.UnfreezeRockets();
-                Debug.Log("Rockets unfrozen");
             }
             else
                 Debug.LogWarning("RocketLauncher is null");
@@ -439,20 +399,16 @@ Jsss000000000000";
         else
             Debug.LogWarning("WeaponCharges.Instance is null");
 
-        Debug.Log("Stopping camera shake");
         if (nm.cc != null)
         {
             nm.cc.StopShake();
-            Debug.Log("Camera shake stopped");
         }
         else
             Debug.LogWarning("Cannot stop camera shake - character controller is null");
 
-        Debug.Log("Activating player");
         try
         {
             nm.ActivatePlayer();
-            Debug.Log("Player activated successfully");
         }
         catch (Exception ex)
         {

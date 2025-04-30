@@ -205,7 +205,7 @@ public static class NextWavePatches
     }
 }
 
-// Add patches for: player speed, rocket riding, bullets, damage receiving, shotgun bullet location rng
+// Add patches for: player speed, rocket riding, bullets, damage receiving, shotgun bullet location rng and TimeController
 //
 //
 
