@@ -4,7 +4,6 @@ TODO:
 ```
 Player Models
 More things to sync
-Fixing the level loading (using Angry as a base)
 Load assetbundles from the mod internally
 More settings and persistant settings config
 when you die dont go to main menu
