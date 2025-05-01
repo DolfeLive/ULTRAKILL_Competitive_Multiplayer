@@ -110,8 +110,11 @@ namespace ULTRAKILL_Competitive_Multiplayer
 
             MU.Callbacks.OnLobbyCreated.AddListener((lobby) =>
             {
+                Debug.Log("Lobby created");
                 isLobbyOwner = true;
+
             });
+            
         }
         
         void Update()
