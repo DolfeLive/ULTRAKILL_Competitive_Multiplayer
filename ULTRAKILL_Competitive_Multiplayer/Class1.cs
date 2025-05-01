@@ -18,6 +18,7 @@ using ULTRAKILL_Competitive_Multiplayer;
 using Unity.AI.Navigation;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
@@ -425,6 +426,8 @@ Jsss000000000000";
 
         if (scene.name == "b3e7f2f8052488a45b35549efb98d902") // Main Menu
         {
+           
+
             try
             {
                 MultiplayerUtil.LobbyManager.Disconnect();
@@ -482,6 +485,23 @@ Jsss000000000000";
             print("now in multiplayer scene!");
             StartCoroutine(DoCGStuff());
             //DoCGStuff();
+        }
+        if (scene.name == "Bootstrap")
+        {
+            print("Bootstrap loaded");
+
+            [DllImport("user32.dll")]
+            static extern IntPtr GetActiveWindow();
+
+            [DllImport("user32.dll")]
+            static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+            const int SW_MAXIMIZE = 3;
+            
+            IntPtr windowHandle = GetActiveWindow();
+            ShowWindow(windowHandle, SW_MAXIMIZE);
+
+
         }
     }
 
