@@ -174,9 +174,9 @@ Jsss000000000000";
         arena4.heights = pattern2;
         //arena4.prefabs = pattern2;
 
-        //patterns.Add(arena);
-        //patterns.Add(arena2);
-        //patterns.Add(stairsTest);
+        patterns.Add(arena);
+        patterns.Add(arena2);
+        patterns.Add(stairsTest);
         patterns.Add(arena3);
         patterns.Add(arena4);
     }
@@ -241,7 +241,7 @@ Jsss000000000000";
     NewMovement nm;
 
     int deaths = 0;
-    void NewMovementRespawn()
+    public void NewMovementRespawn()
     {
         Debug.Log("=== RESPAWN SEQUENCE STARTED ===");
 
@@ -304,32 +304,19 @@ Jsss000000000000";
         else
             Debug.LogWarning("Player rigidbody is null");
 
-        try
-        {
-            var deathSequence = nm.deathSequence;
+        Transform blackscreen = transform.Find("/Canvas/BackScreen");
+        if (blackscreen != null)
+            blackscreen.gameObject.SetActive(false);
 
-            if (deathSequence != null && deathSequence.gameObject != null)
-            {
-                deathSequence.gameObject.SetActive(false);
-            }
-            else
-            {
-                Debug.LogWarning($"deathSequence issues: {(deathSequence == null ? "deathSequence is null" : "deathSequence.gameObject is null")}");
-            }
-        }
-        catch (Exception ex)
+        DeathSequence deathSeq = FindFirstObjectByType<DeathSequence>();
+        if (deathSeq != null)
         {
-            Debug.LogError($"Error in handling deathSequence: {ex.Message}");
-            Debug.LogError($"Exception type: {ex.GetType().Name}");
-            Debug.LogError($"Stack trace: {ex.StackTrace}");
+            deathSeq.gameObject.SetActive(false);
         }
-        //DeathSequence
-
-        //Transform blackscreen = transform.Find("Canvas/BackScreen");
-        //if (blackscreen != null) 
-        //    blackscreen.gameObject.SetActive(false);
-        //Shader.SetGlobalFloat("_Sharpness", 0);
-        //Shader.SetGlobalFloat("_Deathness", 0);
+        else
+        {
+            Debug.Log("DeathSequence is null");
+        }
 
         if (nm.cc != null)
         {
@@ -355,7 +342,7 @@ Jsss000000000000";
 
         if (nm.screenHud != null)
         {
-            nm.screenHud.SetActive(false);
+            nm.screenHud.SetActive(true);
         }
         else
             Debug.LogWarning("screenHud is null");
@@ -484,7 +471,6 @@ Jsss000000000000";
             inMultiplayerScene = true;
             print("now in multiplayer scene!");
             StartCoroutine(DoCGStuff());
-            //DoCGStuff();
         }
         if (scene.name == "Bootstrap")
         {
@@ -528,84 +514,41 @@ Jsss000000000000";
         GameObject arenaGO = cybergrid.gameObject;
         PrefabDatabase prefabs = cybergrid.prefabs;
 
-        /*
-[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
-Stack trace:
-UltraIDK.CompMultiplayerMain+<DoCGStuff>d__27.MoveNext () (at <b501d85f48634232aadd00cbebdb354d>:0)
-UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumerator, System.IntPtr returnValueAddress) (at <dfbdd4656e0844829a5285bde9c1a365>:0)
-         */
-
-        // Instantiate and modify jumpPad
-        GameObject jumpPad = prefabs.jumpPad; //Instantiate(prefabs.jumpPad, new Vector3(0, -500f, 0), Quaternion.identity);
+        GameObject jumpPad = prefabs.jumpPad;
         Debug.Log("[DEBUG] jumpPad instantiated: " + (jumpPad != null));
         jumpPad.name = "JUMPPADTEMPLATE";
-        // Cache animator properties
+        
         EndlessPrefabAnimator originalAnimator = jumpPad.GetComponent<EndlessPrefabAnimator>();
         Debug.Log("[DEBUG] originalAnimator: " + (originalAnimator != null));
 
         bool reverse = originalAnimator.reverse;
         bool reverseOnly = originalAnimator.reverseOnly;
 
-        //Debug.Log("[DEBUG] originalAnimator.pooledId: " + (originalAnimator.pooledId != null));
-        //if (originalAnimator.pooledId != null)
-        //{
-        //    CyberPooledType jumpPadType = originalAnimator.pooledId.Type;
-        //    int jumpPadIndex = originalAnimator.pooledId.Index;
-        //}
-        // Replace components
         DestroyImmediate(originalAnimator);
         CustomEndlessPrefabAnimator CEPA = jumpPad.AddComponent<CustomEndlessPrefabAnimator>();
         CEPA.reverse = reverse;
         CEPA.reverseOnly = reverseOnly;
 
-        //Debug.Log("[DEBUG] CEPA.pooledId: " + (CEPA.pooledId != null));
-        //CEPA.pooledId.Animator = CEPA;
-        //CEPA.pooledId.Type = jumpPadType;
-        //CEPA.pooledId.Index = jumpPadIndex;
-
-        // Add and assign CustomCyberPooledPrefab
-        //CustomCyberPooledPrefab customCPP = jumpPad.AddComponent<CustomCyberPooledPrefab>();
-        //customCPP.Type = jumpPadType;
-        //customCPP.Index = jumpPadIndex;
-        //customCPP.Animator = CEPA;
-
+        
         prefabs.jumpPad = jumpPad;
 
-        // Instantiate and modify stairs
-        GameObject stairs = prefabs.stairs;//Instantiate(prefabs.stairs, new Vector3(0, -500f, 0), Quaternion.identity);
+        GameObject stairs = prefabs.stairs;
         Debug.Log("[DEBUG] stairs instantiated: " + (stairs != null));
         stairs.name = "STAIRSTEMPLATE";
-        // Cache animator properties
+
         EndlessPrefabAnimator stairsAnimator = stairs.GetComponent<EndlessPrefabAnimator>();
         Debug.Log("[DEBUG] stairsAnimator: " + (stairsAnimator != null));
 
         bool stairsReverse = stairsAnimator.reverse;
         bool stairsReverseOnly = stairsAnimator.reverseOnly;
-
-        //Debug.Log("[DEBUG] stairsAnimator.pooledId: " + (stairsAnimator.pooledId != null));
-        //CyberPooledType stairsType = stairsAnimator.pooledId.Type;
-        //int stairsIndex = stairsAnimator.pooledId.Index;
-
-        // Replace components
+        
+        
         DestroyImmediate(stairsAnimator);
         CustomEndlessPrefabAnimator stairsCEPA = stairs.AddComponent<CustomEndlessPrefabAnimator>();
         stairsCEPA.reverse = stairsReverse;
         stairsCEPA.reverseOnly = stairsReverseOnly;
 
-        //Debug.Log("[DEBUG] stairsCEPA.pooledId: " + (stairsCEPA.pooledId != null));
-        //if (originalAnimator.pooledId != null)
-        //{
-        //    stairsCEPA.pooledId.Index = stairsIndex;
-        //    stairsCEPA.pooledId.Animator = stairsCEPA;
-        //    stairsCEPA.pooledId.Type = stairsType;
 
-        //    CustomCyberPooledPrefab stairsCPP = stairs.AddComponent<CustomCyberPooledPrefab>();
-        //    stairsCPP.Type = stairsType;
-        //    stairsCPP.Index = stairsIndex;
-        //    stairsCPP.Animator = stairsCEPA;
-        //}
-
-        // Replace EndlessStairs with CustomEndlessStairs
         EndlessStairs oldStairs = stairs.GetComponent<EndlessStairs>();
         Debug.Log("[DEBUG] oldStairs: " + (oldStairs != null));
 
@@ -628,8 +571,7 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
 
         prefabs.stairs = stairs;
 
-
-
+        
         GameObject gridCube = cybergrid.gridCube;
         NavMeshSurface navMeshSurface = cybergrid.nms;
         GameObject combinedGridStaticObject = cybergrid.combinedGridStaticObject;
@@ -720,9 +662,6 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
 
     public void LoadMultiplayerScene()
     {
-        //SceneHelper.LoadScene("uk_construct");
-        //return;
-
         if (loadScene == false) return;
         string[] scenes = CompMultiplayerMain.sceneBundle.GetAllScenePaths();
         if (scenes.Length > 0)
@@ -731,7 +670,6 @@ UnityEngine.SetupCoroutine.InvokeMoveNext (System.Collections.IEnumerator enumer
 
             if (!string.IsNullOrEmpty(name))
             {
-                //Clogger.Log($"Found scene: {sceneName}");
                 Clogger.Log("Loading multiplayer scene");
                 
                 MonoSingleton<SceneHelper>.Instance.loadingBlocker.SetActive(true);
@@ -792,13 +730,5 @@ public class EscMenu____ : MonoBehaviour
             Menu.SetActive(true);
             this.gameObject.SetActive(false);
         }
-    }
-}
-
-class MyTargetClass
-{
-    private static void MyPrivateStaticMethod(string message)
-    {
-        UnityEngine.Debug.Log("Static Method Called: " + message);
     }
 }

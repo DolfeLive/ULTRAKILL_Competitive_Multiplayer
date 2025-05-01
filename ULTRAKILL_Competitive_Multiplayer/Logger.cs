@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
-
 public static class Logger
 {
     public static void Log(string message) => Log(message, EType.None);

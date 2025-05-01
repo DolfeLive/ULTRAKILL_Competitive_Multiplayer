@@ -10,9 +10,7 @@ using UnityEngine;
 using Clogger = ULTRAKILL_Competitive_Multiplayer.Logger;
 using MultiplayerUtil;
 
-
 namespace ULTRAKILL_Competitive_Multiplayer;
-
 public class LobbyList : MonoBehaviour
 {
     public static bool FetchingLobbies = false;

@@ -71,7 +71,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         }
     }
     #endregion
-    public const int ArenaSize = 64;
+    public const int ArenaSize = 16;
     int gridWidth => ArenaSize;
     int gridHeight => ArenaSize;
     float cubeOffset = 5f;
