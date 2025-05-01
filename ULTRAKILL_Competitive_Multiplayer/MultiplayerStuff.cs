@@ -16,6 +16,14 @@ namespace ULTRAKILL_Competitive_Multiplayer
         public DataPacket player;
         public bool DoPlayerStuff = false;
 
+        public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
+        public Scoreboard scoreboard;
+
+        public static bool isLobbyOwner = false;
+
+        bool NewMovementExists => NewMovement.instance != null;
+        NewMovement nm = NewMovement.instance;
+        
         void Start()
         {
             DontDestroyOnLoad(gameObject);
@@ -27,8 +35,21 @@ namespace ULTRAKILL_Competitive_Multiplayer
                 {
                     if (DoPlayerStuff && NewMovementExists)
                     {
+                        player = new(
+                            MU.LobbyManager.selfID.Value,
+                            nm.hp,
+                            nm.transform.position,
+                            nm.rb.velocity,
+                            new(nm.cc.rotationX, nm.cc.rotationY, 0),
+                            nm.gunc.currentSlotIndex,
+                            nm.gunc.currentVariationIndex,
+                            nm.sliding,
+                            nm.punch.fistCooldown > 0.1f,
+                            false,
+                            nm.slamForce > 0.1f
+                        );
                         Debug.Log($"Sending player pos: ({player.PositionX}, {player.PositionY}, {player.PositionZ})");
-                        MU.LobbyManager.SendData(player);
+                        MU.LobbyManager.SendData(player, SendMethod.UnreliableNoDelay);
                     }
                 }
                 catch (Exception e)
@@ -87,35 +108,17 @@ namespace ULTRAKILL_Competitive_Multiplayer
                 }
             });
 
-            MU.Callbacks.OnLobbyCreated.AddListener(
+            MU.Callbacks.OnLobbyCreated.AddListener((lobby) =>
+            {
+                isLobbyOwner = true;
+            });
         }
-
-        public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
-
-        bool NewMovementExists => NewMovement.instance != null;
-        NewMovement nm = NewMovement.instance;
-
+        
         void Update()
         {
-            if (NewMovementExists)
-            {
-                player = new(
-                    MU.LobbyManager.selfID.Value,
-                    nm.hp,
-                    nm.transform.position,
-                    nm.rb.velocity,
-                    new(nm.cc.rotationX, nm.cc.rotationY, 0),
-                    nm.gunc.currentSlotIndex,
-                    nm.gunc.currentVariationIndex,
-                    nm.sliding,
-                    nm.punch.fistCooldown > 0.1f,
-                    false,
-                    nm.slamForce > 0.1f
-                );
-            }
+            
         }
 
-        public Scoreboard scoreboard;
 
         void LobbyOwnerStuff()
         {
