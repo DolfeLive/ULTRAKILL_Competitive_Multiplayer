@@ -6,7 +6,6 @@ using BepInEx;
 using UnityEngine;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
-
 public static class Semtings
 {
     static string modSettingPath;

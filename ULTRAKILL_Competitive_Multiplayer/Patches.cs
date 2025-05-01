@@ -205,6 +205,43 @@ public static class NextWavePatches
     }
 }
 
+/*
+[Error  : Unity Log] MissingFieldException: Field not found: UnityEngine.GameObject .NewMovement.deathSequence Due to: Could not find field in class
+Stack trace:
+ULTRAKILL_Competitive_Multiplayer.RespawnPatch.UpdatePatch (StatsManager __instance) (at <c7557ae6b06c4600938bf5867ead8fe0>:0)
+(wrapper dynamic-method) StatsManager.DMD<StatsManager::Update>(StatsManager)
+*/
+[HarmonyPatch(typeof(StatsManager), "Update")]
+public static class RespawnPatch
+{
+    [HarmonyPrefix]
+    public static bool UpdatePatch(StatsManager __instance)
+    {
+        if ((Input.GetKeyDown(KeyCode.R) || (!MonoSingleton<InputManager>.Instance.PerformingCheatMenuCombo() && MonoSingleton<InputManager>.Instance.InputSource.Fire1.WasPerformedThisFrame)) && __instance.nm.hp <= 0 && !__instance.nm.endlessMode && !MonoSingleton<OptionsManager>.Instance.paused)
+        {
+            if (CompMultiplayerMain.instance.inMultiplayerScene)
+                CompMultiplayerMain.instance.NewMovementRespawn();
+            else
+                __instance.Restart();
+        }
+        if (__instance.timer)
+        {
+            __instance.seconds += Time.deltaTime * GameStateManager.Instance.TimerModifier;
+        }
+        if (__instance.stylePoints < 0)
+        {
+            __instance.stylePoints = 0;
+        }
+        if (!__instance.endlessMode)
+        {
+            DiscordController.UpdateStyle(__instance.stylePoints);
+        }
+        return false;
+    }
+}
+
+
+
 // Add patches for: player speed, rocket riding, bullets, damage receiving, shotgun bullet location rng and TimeController
 //
 //

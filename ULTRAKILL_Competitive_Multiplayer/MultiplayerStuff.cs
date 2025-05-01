@@ -39,9 +39,11 @@ namespace ULTRAKILL_Competitive_Multiplayer
 
             MU.Callbacks.TimeToSendUnimportantData.AddListener(() =>
             {
+                if (!MU.LobbyManager.isLobbyOwner) return;
+
                 try
                 {
-                    
+                    LobbyOwnerStuff();
                 }
                 catch (Exception e)
                 {
@@ -84,6 +86,8 @@ namespace ULTRAKILL_Competitive_Multiplayer
                     Debug.LogWarning($"No representative object found for leaving friend ID: {friend.Id}");
                 }
             });
+
+            MU.Callbacks.OnLobbyCreated.AddListener(
         }
 
         public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
@@ -109,6 +113,13 @@ namespace ULTRAKILL_Competitive_Multiplayer
                     nm.slamForce > 0.1f
                 );
             }
+        }
+
+        public Scoreboard scoreboard;
+
+        void LobbyOwnerStuff()
+        {
+
         }
     }
 }
