@@ -41,27 +41,28 @@ namespace ULTRAKILL_Competitive_Multiplayer
                             nm.transform.position,
                             nm.rb.velocity,
                             new(nm.cc.rotationX, nm.cc.rotationY, 0),
-                            nm.gunc.currentSlotIndex,
-                            nm.gunc.currentVariationIndex,
+                            0, //nm.gunc.currentSlotIndex,
+                            0, //nm.gunc.currentVariationIndex,
                             nm.sliding,
                             nm.punch.fistCooldown > 0.1f,
                             false,
                             nm.slamForce > 0.1f
                         );
-                        Debug.Log($"Sending player pos: ({player.PositionX}, {player.PositionY}, {player.PositionZ})");
+                        Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
                         MU.LobbyManager.SendData(player, SendMethod.UnreliableNoDelay);
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"Failed to send data: {e.Message}" +
-                        $"exists: {NewMovementExists}" +
-                        $"nm: {nm}" +
-                        $"gunControl: {nm.gunc}" +
-                        $"punch: {nm.punch}" +
-                        $"cc: {nm.cc}" +
-                        $"rb: {nm.rb}" +
-                        $"LobbyMgr: {MU.LobbyManager.selfID.Value}");
+                        $"exists: {NewMovementExists} \n" +
+                        $"nm: {nm} \n" +
+                        $"gunControl: {nm.gunc} \n" +
+                        $"punch: {nm.punch} \n" +
+                        $"cc: {nm.cc} \n" +
+                        $"rb: {nm.rb} \n" +
+                        $"LobbyMgr: {MU.LobbyManager.selfID.Value} \n" +
+                        $"Player Posses: ({player})");
                 }
             });
 
