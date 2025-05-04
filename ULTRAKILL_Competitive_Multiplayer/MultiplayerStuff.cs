@@ -3,14 +3,14 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 using UltraIDK;
 using UnityEngine;
 using MU = MultiplayerUtil;
 using Vector3 = UnityEngine.Vector3;
 using Quaternion = UnityEngine.Quaternion;
+using Random = UnityEngine.Random;
 using Steamworks.ServerList;
+using System.Collections;
 
 namespace ULTRAKILL_Competitive_Multiplayer
 {
@@ -141,11 +141,39 @@ namespace ULTRAKILL_Competitive_Multiplayer
             {
                 Debug.Log("Lobby Entered");
             });
+
+            StartCoroutine(Mcdondaldwifi());
         }
-        
+
+        public float changeSpeed = 0.5f;
+        private float targetRecvLoss;
+        private float targetSendLoss;
+        private float targetRecvLag;
+        private float targetSendLag;
+
+        IEnumerator Mcdondaldwifi()
+        {
+            targetRecvLoss = Random.Range(0f, 30f);
+            targetSendLoss = Random.Range(0f, 30f);
+            targetRecvLag = Random.Range(0f, 300f);
+            targetSendLag = Random.Range(0f, 300f);
+
+            while (true)
+            {
+                yield return new WaitForSeconds(5.0f);
+
+                targetRecvLoss = Random.Range(0f, 50f);  // Up to 50% loss
+                targetSendLoss = Random.Range(0f, 50f);
+                targetRecvLag = Random.Range(0f, 500f);  // Up to 500ms lag
+                targetSendLag = Random.Range(0f, 500f);
+            }
+        }
         void Update()
         {
-            
+            SteamNetworkingUtils.FakeRecvPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLoss, targetRecvLoss, Time.deltaTime * changeSpeed);
+            SteamNetworkingUtils.FakeSendPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLoss, targetSendLoss, Time.deltaTime * changeSpeed);
+            SteamNetworkingUtils.FakeRecvPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLag, targetRecvLag, Time.deltaTime * changeSpeed);
+            SteamNetworkingUtils.FakeSendPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLag, targetSendLag, Time.deltaTime * changeSpeed);
         }
 
 
