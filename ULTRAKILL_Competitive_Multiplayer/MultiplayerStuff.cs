@@ -90,8 +90,16 @@ namespace ULTRAKILL_Competitive_Multiplayer
             PlayerDetected.AddListener(_ =>
             {
                 var playerData = Data.Deserialize<DataPacket>(_.Item1);
-                print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {_.Item2.Value}");
+                SteamId senderId = _.Item2.Value;
+                print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
                 //player.Display();
+
+                if (!representativeObjects.Any(p => p.Item1 == senderId))
+                {
+                    GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
+                    repSphere.name = $"Rep_{senderId}";
+                    representativeObjects.Add((senderId, repSphere));
+                }
 
                 foreach ((uint, GameObject) player in representativeObjects)
                 {
@@ -106,6 +114,8 @@ namespace ULTRAKILL_Competitive_Multiplayer
 
             MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
             {
+                Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
+
                 if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
                 {
                     Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
@@ -115,6 +125,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
                 GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
                 repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
                 representativeObjects.Add((friend.Id, repSphere));
+
             });
 
             MU.Callbacks.OnLobbyMemberLeave.AddListener((lobby, friend) =>
@@ -140,41 +151,42 @@ namespace ULTRAKILL_Competitive_Multiplayer
             MU.Callbacks.OnLobbyEntered.AddListener((lobby) =>
             {
                 Debug.Log("Lobby Entered");
+
             });
 
-            StartCoroutine(Mcdondaldwifi());
+            //StartCoroutine(Mcdondaldwifi());
         }
 
-        public float changeSpeed = 0.5f;
-        private float targetRecvLoss;
-        private float targetSendLoss;
-        private float targetRecvLag;
-        private float targetSendLag;
+        //public float changeSpeed = 0.5f;
+        //private float targetRecvLoss;
+        //private float targetSendLoss;
+        //private float targetRecvLag;
+        //private float targetSendLag;
 
-        IEnumerator Mcdondaldwifi()
-        {
-            targetRecvLoss = Random.Range(0f, 30f);
-            targetSendLoss = Random.Range(0f, 30f);
-            targetRecvLag = Random.Range(0f, 300f);
-            targetSendLag = Random.Range(0f, 300f);
+        //IEnumerator Mcdondaldwifi()
+        //{
+        //    targetRecvLoss = Random.Range(0f, 30f);
+        //    targetSendLoss = Random.Range(0f, 30f);
+        //    targetRecvLag = Random.Range(0f, 300f);
+        //    targetSendLag = Random.Range(0f, 300f);
 
-            while (true)
-            {
-                yield return new WaitForSeconds(5.0f);
+        //    while (true)
+        //    {
+        //        yield return new WaitForSeconds(5.0f);
 
-                targetRecvLoss = Random.Range(0f, 50f);  // Up to 50% loss
-                targetSendLoss = Random.Range(0f, 50f);
-                targetRecvLag = Random.Range(0f, 500f);  // Up to 500ms lag
-                targetSendLag = Random.Range(0f, 500f);
-            }
-        }
-        void Update()
-        {
-            SteamNetworkingUtils.FakeRecvPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLoss, targetRecvLoss, Time.deltaTime * changeSpeed);
-            SteamNetworkingUtils.FakeSendPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLoss, targetSendLoss, Time.deltaTime * changeSpeed);
-            SteamNetworkingUtils.FakeRecvPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLag, targetRecvLag, Time.deltaTime * changeSpeed);
-            SteamNetworkingUtils.FakeSendPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLag, targetSendLag, Time.deltaTime * changeSpeed);
-        }
+        //        targetRecvLoss = Random.Range(0f, 50f);  // Up to 50% loss
+        //        targetSendLoss = Random.Range(0f, 50f);
+        //        targetRecvLag = Random.Range(0f, 500f);  // Up to 500ms lag
+        //        targetSendLag = Random.Range(0f, 500f);
+        //    }
+        //}
+        //void Update()
+        //{
+        //    SteamNetworkingUtils.FakeRecvPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLoss, targetRecvLoss, Time.deltaTime * changeSpeed);
+        //    SteamNetworkingUtils.FakeSendPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLoss, targetSendLoss, Time.deltaTime * changeSpeed);
+        //    SteamNetworkingUtils.FakeRecvPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLag, targetRecvLag, Time.deltaTime * changeSpeed);
+        //    SteamNetworkingUtils.FakeSendPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLag, targetSendLag, Time.deltaTime * changeSpeed);
+        //}
 
 
         void LobbyOwnerStuff()
