@@ -8,6 +8,9 @@ using System.Text;
 using UltraIDK;
 using UnityEngine;
 using MU = MultiplayerUtil;
+using Vector3 = UnityEngine.Vector3;
+using Quaternion = UnityEngine.Quaternion;
+using Steamworks.ServerList;
 
 namespace ULTRAKILL_Competitive_Multiplayer
 {
@@ -23,7 +26,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
 
         bool NewMovementExists => NewMovement.instance != null;
         NewMovement nm = NewMovement.instance;
-        
+        int amtSent = 0;
         void Start()
         {
             DontDestroyOnLoad(gameObject);
@@ -48,21 +51,24 @@ namespace ULTRAKILL_Competitive_Multiplayer
                             false,
                             nm.slamForce > 0.1f
                         );
-                        Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
+                        amtSent++;
+                        if (amtSent % 100 == 0)
+                            Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
+
                         MU.LobbyManager.SendData(player, SendMethod.UnreliableNoDelay);
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to send data: {e.Message}" +
-                        $"exists: {NewMovementExists} \n" +
-                        $"nm: {nm} \n" +
-                        $"gunControl: {nm.gunc} \n" +
-                        $"punch: {nm.punch} \n" +
-                        $"cc: {nm.cc} \n" +
-                        $"rb: {nm.rb} \n" +
-                        $"LobbyMgr: {MU.LobbyManager.selfID.Value} \n" +
-                        $"Player Posses: ({player})");
+                    Debug.LogError($"Failed to send data: {e.Message}");
+                        //$"exists: {NewMovementExists} \n" +
+                        //$"nm: {nm} \n" +
+                        //$"gunControl: {nm.gunc} \n" +
+                        //$"punch: {nm.punch} \n" +
+                        //$"cc: {nm.cc} \n" +
+                        //$"rb: {nm.rb} \n" +
+                        //$"LobbyMgr: {MU.LobbyManager.selfID.Value} \n" +
+                        //$"Player Posses: ({player})");
                 }
             });
 
@@ -83,9 +89,19 @@ namespace ULTRAKILL_Competitive_Multiplayer
             MU.ObserveManager.SubscribeToType(typeof(DataPacket), out Callbacks.SenderUnityEvent PlayerDetected);
             PlayerDetected.AddListener(_ =>
             {
-                var player = Data.Deserialize<DataPacket>(_.Item1);
-                print($"player Pos: ({player.PositionX}, {player.PositionY}, {player.PositionZ}), Sender id: {_.Item2.Value}");
-                player.Display();
+                var playerData = Data.Deserialize<DataPacket>(_.Item1);
+                print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {_.Item2.Value}");
+                //player.Display();
+
+                foreach ((uint, GameObject) player in representativeObjects)
+                {
+                    uint Id = player.Item1; GameObject repSphere = player.Item2;
+
+                    repSphere.transform.position = new Vector3(playerData.PositionX, playerData.PositionY, playerData.PositionZ);
+                    repSphere.transform.rotation = Quaternion.Euler(playerData.RotationX, playerData.RotationY, 0f);
+                    
+                }
+
             });
 
             MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
@@ -96,7 +112,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
                     return;
                 }
 
-                GameObject repSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
                 repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
                 representativeObjects.Add((friend.Id, repSphere));
             });
