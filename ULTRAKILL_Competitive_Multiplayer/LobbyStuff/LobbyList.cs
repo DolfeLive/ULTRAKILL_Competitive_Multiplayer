@@ -27,21 +27,23 @@ public class LobbyList : MonoBehaviour
     public async void FetchLobbies()
     {
         FetchingLobbies = true;
-        try
-        {
-            List<Lobby> getthingy = getthingy = await MultiplayerUtil.LobbyManager.FetchLobbies(("UKCM", "EtcEtc"));
-        }
-        catch (Exception e)
-        {
-            Clogger.LogError($"Lobby finding exeption: {e}");
-        }
         
         foreach (KeyValuePair<Transform, Lobby> KVP in lobbies)
         {
             Destroy(KVP.Key.gameObject);
         }
 
-        //Clogger.Log($"Found Lobbies: {foundLobbies.Count}");
+        try
+        {
+            foundLobbies = await MultiplayerUtil.LobbyManager.FetchLobbies(("UKCM", "EtcEtc"));
+        }
+        catch (Exception e)
+        {
+            Clogger.LogError($"Lobby finding exeption: {e}");
+        }
+        
+
+        Clogger.Log($"Found Lobbies: {foundLobbies.Count}");
 
         foreach (Lobby lob in foundLobbies)
         {
@@ -98,5 +100,6 @@ class LobbyButton : MonoBehaviour
         ulong.TryParse(lobbyId, out ulong id);
         
         SteamManager.instance.JoinLobbyWithID(id);
+        CompMultiplayerMain.instance.LoadMultiplayerScene();
     }
 }

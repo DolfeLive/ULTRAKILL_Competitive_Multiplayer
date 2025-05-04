@@ -13,8 +13,12 @@ namespace ULTRAKILL_Competitive_Multiplayer;
 
 public class Command
 {
+    static bool registered = false;
     public static void Register()
     {
+        if (registered) return;
+
+        registered = true;
         var nestedTypes = typeof(Commands).GetNestedTypes();
 
         GameConsole.Console.Instance.RegisterCommands(nestedTypes.Where(_ => typeof(ICommand).IsAssignableFrom(_)).
@@ -175,7 +179,7 @@ public class Commands
         {
             Clogger.Log($"Current steam id: {SteamManager.instance.selfID}");
             MultiplayerUtil.SteamManager.instance.EstablishP2P(SteamManager.instance.selfID);
-            MultiplayerUtil.SteamManager.instance.server.besties.Add(new Friend(SteamManager.instance.selfID));
+            MultiplayerUtil.SteamManager.instance.server.besties.Add(SteamManager.instance.selfID);
         }
     }
 
