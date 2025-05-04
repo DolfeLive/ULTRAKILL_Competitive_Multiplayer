@@ -19,7 +19,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
         public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
         public Scoreboard scoreboard;
 
-        public static bool isLobbyOwner = false;
+        public static bool isLobbyOwner { get { return MultiplayerUtil.LobbyManager.isLobbyOwner; } }
 
         bool NewMovementExists => NewMovement.instance != null;
         NewMovement nm = NewMovement.instance;
@@ -111,10 +111,12 @@ namespace ULTRAKILL_Competitive_Multiplayer
             MU.Callbacks.OnLobbyCreated.AddListener((lobby) =>
             {
                 Debug.Log("Lobby created");
-                isLobbyOwner = true;
-
             });
-            
+
+            MU.Callbacks.OnLobbyEntered.AddListener((lobby) =>
+            {
+                Debug.Log("Lobby Entered");
+            });
         }
         
         void Update()

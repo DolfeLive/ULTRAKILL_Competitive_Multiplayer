@@ -46,6 +46,7 @@ public class CompMultiplayerMain : BaseUnityPlugin
     public static GameObject LobbyParent;
 
     private LobbyList? lobbyList;
+    private GameObject multiplayerStuff;
 
     void Awake()
     {
@@ -650,9 +651,12 @@ Jsss000000000000";
             Debug.LogError("CurrentPatternPool is either null or empty");
         }
 
+        multiplayerStuff = Instantiate(new GameObject("MultiplayerStuff"));
+        DontDestroyOnLoad(multiplayerStuff);
+        multiplayerStuff.AddComponent<MultiplayerStuff>();
+
         Debug.Log("DoCGStuff completed");
     }
-
     void OpenMultiMenu()
     {
         Clogger.Log("Player clicked open multiplayer button");
