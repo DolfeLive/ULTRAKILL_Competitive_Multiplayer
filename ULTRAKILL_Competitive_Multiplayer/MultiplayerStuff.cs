@@ -54,7 +54,14 @@ namespace ULTRAKILL_Competitive_Multiplayer
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to send data: {e.Message}");
+                    Debug.LogError($"Failed to send data: {e.Message}" +
+                        $"exists: {NewMovementExists}" +
+                        $"nm: {nm}" +
+                        $"gunControl: {nm.gunc}" +
+                        $"punch: {nm.punch}" +
+                        $"cc: {nm.cc}" +
+                        $"rb: {nm.rb}" +
+                        $"LobbyMgr: {MU.LobbyManager.selfID.Value}");
                 }
             });
 
