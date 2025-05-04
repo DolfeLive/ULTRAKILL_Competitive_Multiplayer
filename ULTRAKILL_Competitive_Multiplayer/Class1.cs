@@ -413,7 +413,7 @@ Jsss000000000000";
 
         if (scene.name == "b3e7f2f8052488a45b35549efb98d902") // Main Menu
         {
-           
+            Command.Register();
 
             try
             {

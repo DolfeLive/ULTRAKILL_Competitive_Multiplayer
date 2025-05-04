@@ -13,8 +13,12 @@ namespace ULTRAKILL_Competitive_Multiplayer;
 
 public class Command
 {
+    static bool registered = false;
     public static void Register()
     {
+        if (registered) return;
+
+        registered = true;
         var nestedTypes = typeof(Commands).GetNestedTypes();
 
         GameConsole.Console.Instance.RegisterCommands(nestedTypes.Where(_ => typeof(ICommand).IsAssignableFrom(_)).
