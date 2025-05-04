@@ -14,7 +14,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
     public class MultiplayerStuff : MonoBehaviour
     {
         public DataPacket player;
-        public bool DoPlayerStuff = false;
+        public bool DoPlayerStuff = true;
 
         public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
         public Scoreboard scoreboard;
@@ -33,7 +33,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
             {
                 try
                 {
-                    if (DoPlayerStuff && NewMovementExists)
+                    if (DoPlayerStuff && NewMovementExists && CompMultiplayerMain.instance.inMultiplayerScene)
                     {
                         player = new(
                             MU.LobbyManager.selfID.Value,
@@ -76,7 +76,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
             PlayerDetected.AddListener(_ =>
             {
                 var player = Data.Deserialize<DataPacket>(_.Item1);
-                //print($"player Pos: ({player.PositionX}, {player.PositionY}, {player.PositionZ}), Sender id: {_.Item2.Value}");
+                print($"player Pos: ({player.PositionX}, {player.PositionY}, {player.PositionZ}), Sender id: {_.Item2.Value}");
                 player.Display();
             });
 
