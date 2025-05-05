@@ -128,9 +128,9 @@ namespace ULTRAKILL_Competitive_Multiplayer
 
             });
 
-            MU.Callbacks.OnLobbyMemberLeave.AddListener((lobby, friend) =>
+            MU.Callbacks.OnLobbyMemberLeave.AddListener((friend) =>
             {
-                var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.AccountId == friend.Id);
+                var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.AccountId == friend.Value);
                 if (repObject != default)
                 {
                     Destroy(repObject.Item2);
@@ -139,7 +139,7 @@ namespace ULTRAKILL_Competitive_Multiplayer
                 }
                 else
                 {
-                    Debug.LogWarning($"No representative object found for leaving friend ID: {friend.Id}");
+                    Debug.LogWarning($"No representative object found for leaving friend ID: {friend.Value}");
                 }
             });
 
