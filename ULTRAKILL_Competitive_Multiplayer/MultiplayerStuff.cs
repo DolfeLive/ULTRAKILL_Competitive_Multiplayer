@@ -114,24 +114,24 @@ public class MultiplayerStuff : MonoBehaviour
 
             MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
             {
-                Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
+                    Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
 
-                if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
+                    if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
+                    {
+                        Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
+                        return;
+                    }
+
+                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
+                repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
+                representativeObjects.Add((friend.Id, repSphere));
+
+                if (scoreboard != null)
                 {
-                    Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
-                    return;
+                    scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
                 }
 
-            GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-            repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
-            representativeObjects.Add((friend.Id, repSphere));
-
-            if (scoreboard != null)
-            {
-                scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
-            }
-
-        });
+            });
 
             MU.Callbacks.OnLobbyMemberLeave.AddListener((friend) =>
             {
