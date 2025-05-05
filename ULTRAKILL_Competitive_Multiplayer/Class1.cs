@@ -48,6 +48,13 @@ public class CompMultiplayerMain : BaseUnityPlugin
     private LobbyList? lobbyList;
     private GameObject multiplayerStuff;
 
+    public List<ArenaPattern> patterns = new();
+    int patternIndex = 0;
+
+    NewMovement nm;
+
+    int deaths = 0;
+
     void Awake()
     {
         gameObject.hideFlags = HideFlags.HideAndDontSave;
@@ -188,8 +195,7 @@ Jsss000000000000";
         MultiplayerUtil.LobbyManager.ReInnitSteamClient(newVal);
         lobbyList?.FetchLobbies();
     }
-
-
+    
     void LoadAssets(string path)
     {
         AssetsBundle = AssetBundle.LoadFromFile(Path.Combine(path, "ukcm.ukcm"));
@@ -205,6 +211,7 @@ Jsss000000000000";
         MultiplayerMenu = AssetsBundle.LoadAsset<GameObject>("Multiplayer Menu");
         MultiplayerModel = AssetsBundle.LoadAsset<GameObject>("MultiplayerModelV2");
     }
+
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.K))
@@ -213,9 +220,9 @@ Jsss000000000000";
         }
         else if (Input.GetKeyDown(KeyCode.P))
         {
-            print($"Respawned, deaths: {deaths}");
-
             NewMovementRespawn();
+
+            print($"Respawned, deaths: {deaths}");
             
         }
         else if (Input.GetKeyDown(KeyCode.O))
@@ -236,15 +243,9 @@ Jsss000000000000";
             cybergrind.LoadPattern(patterns[patternIndex]);
         }
     }
-    public List<ArenaPattern> patterns = new();
-    int patternIndex = 0;
-
-    NewMovement nm;
-
-    int deaths = 0;
     public void NewMovementRespawn()
     {
-        Debug.Log("=== RESPAWN SEQUENCE STARTED ===");
+        Debug.Log("Starting respawn");
 
         if (CameraController.Instance != null)
         {
@@ -282,7 +283,6 @@ Jsss000000000000";
         }
 
         deaths++;
-        Debug.Log($"Death counter increased to {deaths}");
 
         try
         {
@@ -406,7 +406,7 @@ Jsss000000000000";
             Debug.LogError($"Stack trace: {ex.StackTrace}");
         }
 
-        Debug.Log("=== RESPAWN SEQUENCE COMPLETED ===");
+        Debug.Log("Respawned");
     }
     void OnSceneLoaded(Scene scene, LoadSceneMode lsm)
     {
@@ -487,8 +487,6 @@ Jsss000000000000";
             
             IntPtr windowHandle = GetActiveWindow();
             ShowWindow(windowHandle, SW_MAXIMIZE);
-
-
         }
     }
 
@@ -516,11 +514,9 @@ Jsss000000000000";
         PrefabDatabase prefabs = cybergrid.prefabs;
 
         GameObject jumpPad = prefabs.jumpPad;
-        Debug.Log("[DEBUG] jumpPad instantiated: " + (jumpPad != null));
         jumpPad.name = "JUMPPADTEMPLATE";
         
         EndlessPrefabAnimator originalAnimator = jumpPad.GetComponent<EndlessPrefabAnimator>();
-        Debug.Log("[DEBUG] originalAnimator: " + (originalAnimator != null));
 
         bool reverse = originalAnimator.reverse;
         bool reverseOnly = originalAnimator.reverseOnly;
@@ -534,11 +530,9 @@ Jsss000000000000";
         prefabs.jumpPad = jumpPad;
 
         GameObject stairs = prefabs.stairs;
-        Debug.Log("[DEBUG] stairs instantiated: " + (stairs != null));
         stairs.name = "STAIRSTEMPLATE";
 
         EndlessPrefabAnimator stairsAnimator = stairs.GetComponent<EndlessPrefabAnimator>();
-        Debug.Log("[DEBUG] stairsAnimator: " + (stairsAnimator != null));
 
         bool stairsReverse = stairsAnimator.reverse;
         bool stairsReverseOnly = stairsAnimator.reverseOnly;
@@ -551,7 +545,6 @@ Jsss000000000000";
 
 
         EndlessStairs oldStairs = stairs.GetComponent<EndlessStairs>();
-        Debug.Log("[DEBUG] oldStairs: " + (oldStairs != null));
 
         MeshRenderer primaryRenderer = oldStairs.primaryMeshRenderer;
         MeshRenderer secondaryRenderer = oldStairs.secondaryMeshRenderer;
@@ -657,6 +650,7 @@ Jsss000000000000";
 
         Debug.Log("DoCGStuff completed");
     }
+
     void OpenMultiMenu()
     {
         Clogger.Log("Player clicked open multiplayer button");
@@ -690,7 +684,6 @@ Jsss000000000000";
             Clogger.LogWarning("No scenes found in the scene bundle.");
         }
     }
-
 
     public static void InvokePrivate<T>(T target, string methodName, object[] paramz)
     {
