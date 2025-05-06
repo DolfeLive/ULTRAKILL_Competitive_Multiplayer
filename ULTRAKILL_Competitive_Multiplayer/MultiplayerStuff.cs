@@ -86,67 +86,69 @@ public class MultiplayerStuff : MonoBehaviour
             }
         });
 
-            MU.ObserveManager.SubscribeToType(typeof(DataPacket), out Callbacks.SenderUnityEvent PlayerDetected);
-            PlayerDetected.AddListener(_ =>
+        MU.ObserveManager.SubscribeToType(typeof(DataPacket), out Callbacks.SenderUnityEvent PlayerDetected);
+        PlayerDetected.AddListener(_ =>
+        {
+            var playerData = Data.Deserialize<DataPacket>(_.Item1);
+            SteamId senderId = _.Item2.Value;
+            print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
+            
+            if (senderId == LobbyManager.selfID) return;
+
+            if (!representativeObjects.Any(p => p.Item1 == senderId))
             {
-                var playerData = Data.Deserialize<DataPacket>(_.Item1);
-                SteamId senderId = _.Item2.Value;
-                print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
-                //player.Display();
+                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
+                repSphere.name = $"Rep_{senderId}";
+                representativeObjects.Add((senderId, repSphere));
+            }
 
-                if (!representativeObjects.Any(p => p.Item1 == senderId))
-                {
-                    GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-                    repSphere.name = $"Rep_{senderId}";
-                    representativeObjects.Add((senderId, repSphere));
-                }
-
-                foreach ((uint, GameObject) player in representativeObjects)
-                {
-                    uint Id = player.Item1; GameObject repSphere = player.Item2;
+            foreach ((uint, GameObject) player in representativeObjects)
+            {
+                uint Id = player.Item1; GameObject repSphere = player.Item2;
 
                 repSphere.transform.position = new Vector3(playerData.PositionX, playerData.PositionY, playerData.PositionZ);
                 repSphere.transform.rotation = Quaternion.Euler(playerData.RotationX, playerData.RotationY, 0f);
-                
+            }
+        });
+
+
+        MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
+        {
+            Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
+            
+            if (friend.Id == LobbyManager.selfID) return;
+
+            if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
+            {
+                Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
+                return;
+            }
+
+            GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
+            repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
+            representativeObjects.Add((friend.Id, repSphere));
+
+            if (scoreboard != null)
+            {
+                scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
             }
 
         });
 
-            MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
+        MU.Callbacks.OnLobbyMemberLeave.AddListener((friend) =>
+        {
+            var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.AccountId == friend.Value);
+            if (repObject != default)
             {
-                    Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
-
-                    if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
-                    {
-                        Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
-                        return;
-                    }
-
-                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-                repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
-                representativeObjects.Add((friend.Id, repSphere));
-
-                if (scoreboard != null)
-                {
-                    scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
-                }
-
-            });
-
-            MU.Callbacks.OnLobbyMemberLeave.AddListener((friend) =>
+                Destroy(repObject.Item2);
+                representativeObjects.Remove(repObject);
+                print($"AWDAWD: {string.Join(", ", representativeObjects)}");
+            }
+            else
             {
-                var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.AccountId == friend.Value);
-                if (repObject != default)
-                {
-                    Destroy(repObject.Item2);
-                    representativeObjects.Remove(repObject);
-                    print($"AWDAWD: {string.Join(", ", representativeObjects)}");
-                }
-                else
-                {
-                    Debug.LogWarning($"No representative object found for leaving friend ID: {friend.Value}");
-                }
-            });
+                Debug.LogWarning($"No representative object found for leaving friend ID: {friend.Value}");
+            }
+        });
 
         MU.Callbacks.OnLobbyCreated.AddListener((lobby) =>
         {
