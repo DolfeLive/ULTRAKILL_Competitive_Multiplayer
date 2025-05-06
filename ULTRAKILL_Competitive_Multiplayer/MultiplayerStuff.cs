@@ -86,11 +86,13 @@ public class MultiplayerStuff : MonoBehaviour
         });
 
         MU.ObserveManager.SubscribeToType(typeof(DataPacket), out Callbacks.SenderUnityEvent PlayerDetected);
-        PlayerDetected.AddListener(_ => {
+        PlayerDetected.AddListener(_ =>
+        {
             var playerData = Data.Deserialize<DataPacket>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            //print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
-            //player.Display();
+            print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
+            
+            if (senderId == LobbyManager.selfID) return;
 
             if (!representativeObjects.Any(p => p.Item1 == senderId))
             {
@@ -111,13 +113,15 @@ public class MultiplayerStuff : MonoBehaviour
 
         MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
         {
-                Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
+            Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
+            
+            if (friend.Id == LobbyManager.selfID) return;
 
-                if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
-                {
-                    Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
-                    return;
-                }
+            if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
+            {
+                Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
+                return;
+            }
 
             GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
             repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
@@ -137,6 +141,7 @@ public class MultiplayerStuff : MonoBehaviour
             {
                 Destroy(repObject.Item2);
                 representativeObjects.Remove(repObject);
+                print($"AWDAWD: {string.Join(", ", representativeObjects)}");
             }
             else
             {
