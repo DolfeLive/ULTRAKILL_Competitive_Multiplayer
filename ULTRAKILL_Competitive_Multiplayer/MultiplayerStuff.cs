@@ -59,7 +59,8 @@ public class MultiplayerStuff : MonoBehaviour
 
         });
 
-        MU.Callbacks.TimeToSendUnimportantData.AddListener(() => {
+        MU.Callbacks.TimeToSendUnimportantData.AddListener(() =>
+        {
             if (!MU.LobbyManager.isLobbyOwner) return;
 
             try
@@ -78,7 +79,7 @@ public class MultiplayerStuff : MonoBehaviour
             var playerData = Data.Deserialize<PlayerMoveEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
             print($"player Pos: ({playerData.position}, Sender id: {senderId}");
-            
+
             if (senderId == LobbyManager.selfID) return;
 
             if (!representativeObjects.Any(p => p.Item1 == senderId))
@@ -92,12 +93,12 @@ public class MultiplayerStuff : MonoBehaviour
             {
                 uint Id = player.Item1; GameObject repSphere = player.Item2;
 
-                repSphere.transform.position = playerData.position.ToVec3(); 
+                repSphere.transform.position = playerData.position.ToVec3();
             }
         });
 
-        MU.ObserveManager.SubscribeToType(typeof(LookEvent), out Callbacks.SenderUnityEvent PlayerHeadMoved);
-        PlayerHeadMoved.AddListener(_ =>
+        MU.ObserveManager.SubscribeToType(typeof(LookEvent), out Callbacks.SenderUnityEvent playerHeadMoved);
+        playerHeadMoved.AddListener(_ =>
         {
             var playerData = Data.Deserialize<LookEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
@@ -124,7 +125,7 @@ public class MultiplayerStuff : MonoBehaviour
         MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
         {
             Debug.Log($"Lobby member joined: {friend.Name} ({friend.Id})");
-            
+
             if (friend.Id == LobbyManager.selfID) return;
 
             if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
@@ -170,40 +171,7 @@ public class MultiplayerStuff : MonoBehaviour
             Debug.Log("Lobby Entered");
         });
 
-            //StartCoroutine(Mcdondaldwifi());
-        }
-
-        //public float changeSpeed = 0.5f;
-        //private float targetRecvLoss;
-        //private float targetSendLoss;
-        //private float targetRecvLag;
-        //private float targetSendLag;
-
-        //IEnumerator Mcdondaldwifi()
-        //{
-        //    targetRecvLoss = Random.Range(0f, 30f);
-        //    targetSendLoss = Random.Range(0f, 30f);
-        //    targetRecvLag = Random.Range(0f, 300f);
-        //    targetSendLag = Random.Range(0f, 300f);
-
-        //    while (true)
-        //    {
-        //        yield return new WaitForSeconds(5.0f);
-
-        //        targetRecvLoss = Random.Range(0f, 50f);  // Up to 50% loss
-        //        targetSendLoss = Random.Range(0f, 50f);
-        //        targetRecvLag = Random.Range(0f, 500f);  // Up to 500ms lag
-        //        targetSendLag = Random.Range(0f, 500f);
-        //    }
-        //}
-        //void Update()
-        //{
-        //    SteamNetworkingUtils.FakeRecvPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLoss, targetRecvLoss, Time.deltaTime * changeSpeed);
-        //    SteamNetworkingUtils.FakeSendPacketLoss = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLoss, targetSendLoss, Time.deltaTime * changeSpeed);
-        //    SteamNetworkingUtils.FakeRecvPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeRecvPacketLag, targetRecvLag, Time.deltaTime * changeSpeed);
-        //    SteamNetworkingUtils.FakeSendPacketLag = Mathf.Lerp(SteamNetworkingUtils.FakeSendPacketLag, targetSendLag, Time.deltaTime * changeSpeed);
-        //}
-
+    }
 
     void LobbyOwnerStuff()
     {
@@ -219,11 +187,28 @@ public class MultiplayerStuff : MonoBehaviour
 
             scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
         }
-
         
-
     }
 
+    public static void OnEtc()
+    {
+
+    }
+    public static void OnWeaponChange(int slotIndex, int VarIndex)
+    {
+        try
+        {
+            WeaponChangeEvent weaponChangeEvent = new();
+            weaponChangeEvent.WeaponIndex = (byte)slotIndex;
+            weaponChangeEvent.VariationIndex = (byte)VarIndex;
+
+            MU.LobbyManager.SendData(weaponChangeEvent);
+        }
+        catch
+        {
+
+        }
+    }
 
     public static byte boolsToBinary(bool[] bools)
     {
