@@ -1,5 +1,6 @@
 ﻿using Steamworks;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
@@ -12,6 +13,13 @@ public class SerializableVec3
     public float z;
 
     public SerializableVec3() { }
+
+    public SerializableVec3(float x, float y, float z)
+    {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 
     public SerializableVec3(Vector3 vec)
     {
@@ -58,6 +66,13 @@ public class SerializableVec4
     }
 }
 
+public static class Vec3Extentions
+{
+    public static SerializableVec3 ToSVec3(this Vector3 vec)
+    {
+        return new SerializableVec3(vec);
+    }
+}
 
 #region To everyone
 
@@ -66,7 +81,20 @@ public class PlayerMoveEvent
 {
     public SerializableVec3 position;
     public SerializableVec3 velocity;
-    public byte properties; // { jumping, dashing, SSJing, Jump Pad, Explode, Sliding }
+    public byte properties; // { jumping, dashing, SSJing, Sliding, Slamming }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="velocity"></param>
+    /// <param name="properties">{ jumping, dashing, SSJing, Slidin, Slamming }</param>
+    public PlayerMoveEvent(SerializableVec3 position, SerializableVec3 velocity, byte properties)
+    {
+        this.position = position;
+        this.velocity = velocity;
+        this.properties = properties;
+    }
 }
 
 [Serializable]

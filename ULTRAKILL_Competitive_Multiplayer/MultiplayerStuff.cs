@@ -38,38 +38,25 @@ public class MultiplayerStuff : MonoBehaviour
             {
                 if (DoPlayerStuff && NewMovementExists && CompMultiplayerMain.instance.inMultiplayerScene)
                 {
-                    player = new(
-                        MU.LobbyManager.selfID.Value,
-                        nm.hp,
-                        nm.transform.position,
-                        nm.rb.velocity,
-                        new(nm.cc.rotationX, nm.cc.rotationY, 0),
-                        0, //nm.gunc.currentSlotIndex,
-                        0, //nm.gunc.currentVariationIndex,
-                        nm.sliding,
-                        nm.punch.fistCooldown > 0.1f,
-                        false,
-                        nm.slamForce > 0.1f
-                    );
-                    amtSent++;
-                    if (amtSent % 500 == 0)
-                        Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
+                    // { jumping, dashing, SSJing, Sliding, Slamming }
+                    PlayerMoveEvent move = new(nm.transform.position.ToSVec3(), nm.rb.velocity.ToSVec3(), boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
+                    LookEvent lookEvent = new();
+                    lookEvent.Dir = new SerializableVec3(nm.cc.rotationX, nm.cc.rotationY, 0);
 
-                    MU.LobbyManager.SendData(player, SendMethod.UnreliableNoDelay);
+                    //amtSent++;
+                    //if (amtSent % 500 == 0)
+                    //    Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
+
+                    MU.LobbyManager.SendData(move, SendMethod.UnreliableNoDelay);
+                    MU.LobbyManager.SendData(lookEvent, SendMethod.UnreliableNoDelay);
+
                 }
             }
             catch (Exception e)
             {
                 Debug.LogError($"Failed to send data: {e.Message}");
-                    //$"exists: {NewMovementExists} \n" +
-                    //$"nm: {nm} \n" +
-                    //$"gunControl: {nm.gunc} \n" +
-                    //$"punch: {nm.punch} \n" +
-                    //$"cc: {nm.cc} \n" +
-                    //$"rb: {nm.rb} \n" +
-                    //$"LobbyMgr: {MU.LobbyManager.selfID.Value} \n" +
-                    //$"Player Posses: ({player})");
             }
+
         });
 
         MU.Callbacks.TimeToSendUnimportantData.AddListener(() => {
@@ -85,12 +72,12 @@ public class MultiplayerStuff : MonoBehaviour
             }
         });
 
-        MU.ObserveManager.SubscribeToType(typeof(DataPacket), out Callbacks.SenderUnityEvent PlayerDetected);
+        MU.ObserveManager.SubscribeToType(typeof(PlayerMoveEvent), out Callbacks.SenderUnityEvent PlayerDetected);
         PlayerDetected.AddListener(_ =>
         {
-            var playerData = Data.Deserialize<DataPacket>(_.Item1);
+            var playerData = Data.Deserialize<PlayerMoveEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            print($"player Pos: ({playerData.PositionX}, {playerData.PositionY}, {playerData.PositionZ}), Sender id: {senderId}");
+            print($"player Pos: ({playerData.position}, Sender id: {senderId}");
             
             if (senderId == LobbyManager.selfID) return;
 
@@ -105,8 +92,31 @@ public class MultiplayerStuff : MonoBehaviour
             {
                 uint Id = player.Item1; GameObject repSphere = player.Item2;
 
-                repSphere.transform.position = new Vector3(playerData.PositionX, playerData.PositionY, playerData.PositionZ); 
-                repSphere.transform.rotation = Quaternion.Euler(playerData.RotationX, playerData.RotationY, 0f);
+                repSphere.transform.position = playerData.position.ToVec3(); 
+            }
+        });
+
+        MU.ObserveManager.SubscribeToType(typeof(LookEvent), out Callbacks.SenderUnityEvent PlayerHeadMoved);
+        PlayerHeadMoved.AddListener(_ =>
+        {
+            var playerData = Data.Deserialize<LookEvent>(_.Item1);
+            SteamId senderId = _.Item2.Value;
+            print($"player look Dir: ({playerData.Dir}, Sender id: {senderId}");
+
+            if (senderId == LobbyManager.selfID) return;
+
+            if (!representativeObjects.Any(p => p.Item1 == senderId))
+            {
+                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
+                repSphere.name = $"Rep_{senderId}";
+                representativeObjects.Add((senderId, repSphere));
+            }
+
+            foreach ((uint, GameObject) player in representativeObjects)
+            {
+                uint Id = player.Item1; GameObject repSphere = player.Item2;
+
+                repSphere.transform.rotation = Quaternion.Euler(playerData.Dir.ToVec3());
             }
         });
 
@@ -212,5 +222,21 @@ public class MultiplayerStuff : MonoBehaviour
 
         
 
+    }
+
+
+    public static byte boolsToBinary(bool[] bools)
+    {
+        byte binary = 0b00000000;
+        int length = Math.Min(bools.Length, 8);
+
+        for (int i = 0; i < length; i++)
+        {
+            if (bools[i])
+            {
+                binary |= (byte)(1 << i);
+            }
+        }
+        return binary;
     }
 }
