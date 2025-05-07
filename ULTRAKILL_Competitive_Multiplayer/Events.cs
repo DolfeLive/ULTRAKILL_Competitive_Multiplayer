@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Steamworks;
+using System;
 using UnityEngine;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
@@ -25,16 +26,173 @@ public class SerializableVec3
     }
 }
 
+[Serializable]
+public class SerializableVec4
+{
+    public float x;
+    public float y;
+    public float z;
+    public float w;
+
+    public SerializableVec4() { }
+
+    public SerializableVec4(Vector3 vec)
+    {
+        x = vec.x;
+        y = vec.y;
+        z = vec.z;
+        w = 0f;
+    }
+
+    public SerializableVec4(Vector4 vec)
+    {
+        x = vec.x;
+        y = vec.y;
+        z = vec.z;
+        w = vec.w;
+    }
+    
+    public Vector4 ToVec4()
+    {
+        return new Vector4(x, y, z, w);
+    }
+}
+
+
 #region To everyone
 
 [Serializable]
-public class GameEvent { }
-
-[Serializable]
-public class PlayerMoveEvent : GameEvent
+public class PlayerMoveEvent
 {
     public SerializableVec3 position;
     public SerializableVec3 velocity;
+    public byte properties; // { jumping, dashing, SSJing, Jump Pad, Explode, Sliding }
+}
+
+[Serializable]
+public class LookEvent
+{
+    public SerializableVec3 Dir;
+}
+
+[Serializable]
+public class WeaponChangeEvent
+{
+    public byte WeaponIndex;
+    public byte VariationIndex;
+}
+
+/// <summary>
+/// The server will still handle the hit reg
+/// </summary>
+[Serializable]
+public class PunchBeginEvent
+{
+    public SerializableVec3 Dir;
+    public byte Type;
+}
+
+//TODO Later: Emote Begin and gun property change
+
+#endregion
+
+#region Player To Server
+
+[Serializable]
+/// <summary>
+/// The server will need to keep track of player coin cooldowns
+/// </summary>
+public class CoinThrowEvent
+{
+    public SerializableVec3 Dir;
+    public SerializableVec3 PlayerVelocity;
+
+}
+
+/// <summary>
+/// Parry
+/// </summary>
+[Serializable]
+public class ParryEvent
+{
+    public SerializableVec3 Dir;
+    public uint projId;
+}
+
+/// <summary>
+/// handles all types of shooting, gun, shotgun, rocket
+/// </summary>
+[Serializable]
+public class ShootEvent
+{
+    public SerializableVec3 Source;
+    public SerializableVec3 Dir;
+    public bool AltFire;
+    public byte WeaponIndex;
+    public byte VariationIndex;
+}
+
+/// <summary>
+/// for jackhammer
+/// </summary>
+/*[Serializable]
+public class JackhammerEvent
+{
+    public byte velocity;
+    public byte VarIndex;
+    public SerializableVec3 Dir;
+}*/
+
+#endregion
+
+#region ServerToPlayers
+
+[Serializable]
+public class ArenaChangeEvent
+{
+    public byte Index;
+    public byte RNGSeed;
+}
+
+[Serializable]
+public class BuletHitEvent
+{
+    public SteamId HitPlayerID;
+    public byte Damage;
+    public uint projID;
+}
+
+[Serializable]
+public class ExplosionSpawnEvent
+{
+    public SerializableVec4 details; // xyz: pos, w: size
+}
+
+[Serializable]
+public class ProjSpawnEvent
+{
+    public uint ProjID;
+    public SerializableVec3 Pos;
+    public SerializableVec3 Velocity;
+    public byte type;
+}
+
+[Serializable]
+public class ProjDestroyEvent
+{
+    public uint ProjID;
+    public byte type; // { Explode On destroy, Size }
+    public SerializableVec3 Pos;
+}
+
+/// <summary>
+/// Spawn/Die
+/// </summary>
+[Serializable]
+public class PlayerExistEvent
+{
+    public SteamId playerId;
+    public SerializableVec3 pos;
 }
 
 #endregion
