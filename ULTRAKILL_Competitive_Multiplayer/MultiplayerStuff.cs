@@ -82,6 +82,7 @@ public class MultiplayerStuff : MonoBehaviour
         #endregion
 
         #region data Recive Callbacks
+        MU.ObserveManager.MessageReceivedLogging = true;
 
         MU.ObserveManager.SubscribeToType(typeof(PlayerMoveEvent), out Callbacks.SenderUnityEvent PlayerDetected);
         PlayerDetected.AddListener(_ =>
