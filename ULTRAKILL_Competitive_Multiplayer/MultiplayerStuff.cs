@@ -16,7 +16,6 @@ namespace ULTRAKILL_Competitive_Multiplayer;
 
 public class MultiplayerStuff : MonoBehaviour
 {
-    public DataPacket player;
     public bool DoPlayerStuff = true;
 
     public List<(SteamId, GameObject, Player)> representativeObjects = new();
@@ -117,9 +116,9 @@ public class MultiplayerStuff : MonoBehaviour
                 uint Id = player.Item1;
                 if (senderId != Id) continue;
 
-                GameObject repSphere = player.Item2;
+                //GameObject repSphere = player.Item2;
 
-                repSphere.transform.rotation = Quaternion.Euler(playerData.Dir.ToVec3());
+                //repSphere.transform.rotation = Quaternion.Euler(playerData.Dir.ToVec3());
                 player.Item3.Aim(playerData.Dir.ToVec3());
             }
         });

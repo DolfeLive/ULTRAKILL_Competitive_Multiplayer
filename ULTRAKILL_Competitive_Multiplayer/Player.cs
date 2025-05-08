@@ -86,9 +86,10 @@ public class Player : MonoBehaviour
     {
         position = pos;
         velocity = Vel;
+        Debug.Log($"Moved");
 
         // { jumping, dashing, SSJing, Sliding, Slamming }
-        
+
     }
 
     public void ReliableStateInfo(byte properties)
@@ -104,6 +105,7 @@ public class Player : MonoBehaviour
             aimAtTarget[0].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Head
             aimAtTarget[1].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Arm
         }
+        Debug.Log($"Aimed");
     }
 
 

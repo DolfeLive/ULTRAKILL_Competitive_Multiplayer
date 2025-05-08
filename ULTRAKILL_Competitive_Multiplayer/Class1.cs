@@ -638,8 +638,8 @@ Jsss000000000000";
         }
 
         multiplayerStuff = Instantiate(new GameObject("MultiplayerStuff"));
-        DontDestroyOnLoad(multiplayerStuff);
         multiplayerStuff.AddComponent<MultiplayerStuff>();
+        DontDestroyOnLoad(multiplayerStuff);
 
         Debug.Log("DoCGStuff completed");
     }
