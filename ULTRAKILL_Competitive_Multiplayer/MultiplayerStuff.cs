@@ -89,7 +89,7 @@ public class MultiplayerStuff : MonoBehaviour
         {
             var playerData = Data.Deserialize<PlayerMoveEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            print($"player Pos: ({playerData.position}, Sender id: {senderId}");
+            print($"player Pos recived: ({playerData.position.ToVec3()}, Sender id: {senderId}");
 
             if (senderId == LobbyManager.selfID) return;
 
@@ -98,7 +98,7 @@ public class MultiplayerStuff : MonoBehaviour
             foreach ((uint, GameObject, Player) player in representativeObjects)
             {
                 uint Id = player.Item1;
-                if (senderId != Id) continue;
+                if (senderId.Value != Id) continue;
 
                 GameObject repSphere = player.Item2;
 
