@@ -604,7 +604,7 @@ Jsss000000000000";
         CustomCybergrind cg = arenaGO.AddComponent<CustomCybergrind>();
         cg.gridCube = gridCube; 
         cg.prefabs = prefabs;
-        cg.nms = navMeshSurface;
+        //cg.nms = navMeshSurface;
         cg.offset = 5;
         cg.glowMultiplier = 1f;
 

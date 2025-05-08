@@ -190,6 +190,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             material.SetFloat("_GradientSpeed", 25f);
             material.SetVector("_WorldOffset", new Vector4(0f, 27f, 62.5f, 0f));
             this.targetColor = Color.blue;
+            material.enableInstancing = true;
         }
 
         UpdatePhysics();
