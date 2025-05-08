@@ -461,16 +461,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         combinedGridStaticObject.SetActive(true);
         combinedGridStaticMeshFilter.sharedMesh = combinedGridStaticMesh;
     }
-    void PrintHierarchy(Transform current, int depth)
-    {
-        string indent = new string(' ', depth * 2);
-        Debug.Log(indent + current.name);
-
-        foreach (Transform child in current)
-        {
-            PrintHierarchy(child, depth + 1);
-        }
-    }
+    
     public void OneDone()
     {
         jumpPadSelector = 0;

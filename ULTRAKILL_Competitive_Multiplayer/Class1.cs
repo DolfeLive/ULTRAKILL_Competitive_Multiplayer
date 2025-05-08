@@ -38,12 +38,14 @@ public class CompMultiplayerMain : BaseUnityPlugin
 
     public static AssetBundle AssetsBundle;
     public static AssetBundle sceneBundle;
+    public static AssetBundle playerBundle;
 
     GameObject MultiplayerMenu;
     public static GameObject MultiplayerModel;
     GameObject MMObject;
     public static GameObject LobbyPrefab;
     public static GameObject LobbyParent;
+    public static GameObject playerGO;
 
     private LobbyList? lobbyList;
     private GameObject multiplayerStuff;
@@ -200,6 +202,7 @@ Jsss000000000000";
     {
         AssetsBundle = AssetBundle.LoadFromFile(Path.Combine(path, "ukcm.ukcm"));
         sceneBundle = AssetBundle.LoadFromFile(Path.Combine(path, "level.meatgrinder"));
+        playerBundle = AssetBundle.LoadFromFile(Path.Combine(path, "player.player"));
 
         if (AssetsBundle == null)
         {
@@ -210,22 +213,12 @@ Jsss000000000000";
         LobbyPrefab = AssetsBundle.LoadAsset<GameObject>("Lobby");
         MultiplayerMenu = AssetsBundle.LoadAsset<GameObject>("Multiplayer Menu");
         MultiplayerModel = AssetsBundle.LoadAsset<GameObject>("MultiplayerModelV2");
+        playerGO = playerBundle.LoadAsset<GameObject>("Player");
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            NewMovement.Instance.GetHurt(1000, false);
-        }
-        else if (Input.GetKeyDown(KeyCode.P))
-        {
-            NewMovementRespawn();
-
-            print($"Respawned, deaths: {deaths}");
-            
-        }
-        else if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.O))
         { 
             print($"Pat indx: {patternIndex}, patterns cnt: {patterns.Count}, patterns: {patterns.Select(_ => _.name)}");
             patternIndex++;

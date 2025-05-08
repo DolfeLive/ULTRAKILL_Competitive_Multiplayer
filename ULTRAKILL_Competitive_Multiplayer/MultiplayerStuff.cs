@@ -19,14 +19,14 @@ public class MultiplayerStuff : MonoBehaviour
     public DataPacket player;
     public bool DoPlayerStuff = true;
 
-    public List<(SteamId, GameObject)> representativeObjects = new List<(SteamId, GameObject)>();
+    public List<(SteamId, GameObject, Player)> representativeObjects = new();
+    
     public Scoreboard scoreboard;
 
     public static bool isLobbyOwner { get { return MultiplayerUtil.LobbyManager.isLobbyOwner; } }
 
     bool NewMovementExists => NewMovement.instance != null;
     NewMovement nm = NewMovement.instance;
-    int amtSent = 0;
     void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -82,16 +82,15 @@ public class MultiplayerStuff : MonoBehaviour
 
             if (senderId == LobbyManager.selfID) return;
 
-            if (!representativeObjects.Any(p => p.Item1 == senderId))
-            {
-                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-                repSphere.name = $"Rep_{senderId}";
-                representativeObjects.Add((senderId, repSphere));
-            }
+            RepresentaiveObjectStuff(senderId);
 
-            foreach ((uint, GameObject) player in representativeObjects)
+            foreach ((uint, GameObject, Player) player in representativeObjects)
             {
-                uint Id = player.Item1; GameObject repSphere = player.Item2;
+                uint Id = player.Item1;
+                if (senderId != Id) continue;
+
+                GameObject repSphere = player.Item2;
+
 
                 repSphere.transform.position = playerData.position.ToVec3();
             }
@@ -106,16 +105,14 @@ public class MultiplayerStuff : MonoBehaviour
 
             if (senderId == LobbyManager.selfID) return;
 
-            if (!representativeObjects.Any(p => p.Item1 == senderId))
-            {
-                GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-                repSphere.name = $"Rep_{senderId}";
-                representativeObjects.Add((senderId, repSphere));
-            }
+            RepresentaiveObjectStuff(senderId);
 
-            foreach ((uint, GameObject) player in representativeObjects)
+            foreach ((uint, GameObject, Player) player in representativeObjects)
             {
-                uint Id = player.Item1; GameObject repSphere = player.Item2;
+                uint Id = player.Item1;
+                if (senderId != Id) continue;
+
+                GameObject repSphere = player.Item2;
 
                 repSphere.transform.rotation = Quaternion.Euler(playerData.Dir.ToVec3());
             }
@@ -131,13 +128,12 @@ public class MultiplayerStuff : MonoBehaviour
             if (representativeObjects.Any(_ => _.Item1.AccountId == friend.Id))
             {
                 Debug.LogWarning($"Representative object already exists for friend ID: {friend.Id}");
-                return;
             }
+            else
+                RepresentaiveObjectStuff(friend.Id);
 
-            GameObject repSphere = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), Vector3.zero, Quaternion.identity);
-            repSphere.name = $"Rep_{friend.Id}_{friend.Name}";
-            representativeObjects.Add((friend.Id, repSphere));
 
+            if (!isLobbyOwner) return;
             if (scoreboard != null)
             {
                 scoreboard.addPlayer(new scoreboardPlayer(friend.Name, friend.Id));
@@ -152,7 +148,7 @@ public class MultiplayerStuff : MonoBehaviour
             {
                 Destroy(repObject.Item2);
                 representativeObjects.Remove(repObject);
-                print($"AWDAWD: {string.Join(", ", representativeObjects)}");
+                print($"Other rep objects: {string.Join(", ", representativeObjects)}");
             }
             else
             {
@@ -173,6 +169,54 @@ public class MultiplayerStuff : MonoBehaviour
 
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            GameObject repSphere = Instantiate(CompMultiplayerMain.playerGO, Vector3.zero, Quaternion.identity);
+            //PrintHierarchy(repSphere.transform, 0);
+            Player player = repSphere.AddComponent<Player>();
+            repSphere.name = $"Rep_awdawdawd";
+            representativeObjects.Add((0987654567, repSphere, player));
+            print("creating object");
+        }
+
+        if (Input.GetKey(KeyCode.K))
+        {
+            foreach ((uint, GameObject, Player) player in representativeObjects)
+            {
+                uint Id = player.Item1;
+
+                GameObject repSphere = player.Item2;
+
+                Debug.Log("Set pos");
+                repSphere.transform.position = nm.transform.position + new Vector3(5, 0, 0);
+            }
+        }
+
+    }
+
+    void RepresentaiveObjectStuff(SteamId senderId)
+    {
+        if (!representativeObjects.Any(p => p.Item1 == senderId))
+        {
+            GameObject repSphere = Instantiate(CompMultiplayerMain.playerGO, Vector3.zero, Quaternion.identity);
+            PrintHierarchy(repSphere.transform, 0);
+            Player player = repSphere.AddComponent<Player>();
+            repSphere.name = $"Rep_{senderId}";
+            representativeObjects.Add((senderId, repSphere, player));
+        }
+    }
+    public void PrintHierarchy(Transform current, int depth)
+    {
+        string indent = new string(' ', depth * 2);
+        print($"> {indent} {current.name}");
+
+        foreach (Transform child in current)
+        {
+            PrintHierarchy(child, depth + 1);
+        }
+    }
     void LobbyOwnerStuff()
     {
         if (scoreboard == null)
@@ -201,7 +245,7 @@ public class MultiplayerStuff : MonoBehaviour
             WeaponChangeEvent weaponChangeEvent = new();
             weaponChangeEvent.WeaponIndex = (byte)slotIndex;
             weaponChangeEvent.VariationIndex = (byte)VarIndex;
-
+            Debug.Log($"Weapon changed: index: {slotIndex}, varIndex: {VarIndex}");
             MU.LobbyManager.SendData(weaponChangeEvent);
         }
         catch
