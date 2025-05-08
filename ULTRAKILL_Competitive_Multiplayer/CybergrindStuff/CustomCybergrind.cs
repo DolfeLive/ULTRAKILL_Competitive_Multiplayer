@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Unity.AI.Navigation;
+//using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -26,7 +26,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     public CustomEndlessCube[][] cubes;
     private int incompleteBlocks;
     private ArenaPattern currentPattern;
-    public NavMeshSurface nms;
+    //public NavMeshSurface nms;
     public int currentPatternNum = -1;
     public List<GameObject> spawnedPrefabs = new List<GameObject>();
     private int incompletePrefabs;
@@ -87,7 +87,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             return;
         }
         
-        this.nms = base.GetComponent<NavMeshSurface>();
+        //this.nms = base.GetComponent<NavMeshSurface>();
         this.gz = GoreZone.ResolveGoreZone(base.transform);
         
         this.cubes = new CustomEndlessCube[gridHeight][];
