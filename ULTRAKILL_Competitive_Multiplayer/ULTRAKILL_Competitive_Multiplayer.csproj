@@ -52,7 +52,7 @@
       <HintPath>C:\UltrakillDeps\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\source\repos\_UltrakillDeps\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>C:\UltrakillDeps\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>C:\UltrakillDeps\UnityEngine.AssetBundleModule.dll</HintPath>
