@@ -43,9 +43,7 @@ public class MultiplayerStuff : MonoBehaviour
                 {
                     // { jumping, dashing, SSJing, Sliding, Slamming }
                     PlayerMoveEvent move = new(nm.transform.position.ToSVec3(), nm.rb.velocity.ToSVec3(), boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
-                    LookEvent lookEvent = new();
-                    lookEvent.Dir = new SerializableVec3(nm.cc.rotationX, nm.cc.rotationY, 0);
-
+                    LookEvent lookEvent = new(new SerializableVec3(nm.cc.rotationX, nm.cc.rotationY, 0));
                     ReliableStateInfo rsi = new(boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
 
                     MU.LobbyManager.SendData(move, SendMethod.UnreliableNoDelay);
@@ -98,11 +96,15 @@ public class MultiplayerStuff : MonoBehaviour
             foreach ((uint, GameObject, Player) player in representativeObjects)
             {
                 uint Id = player.Item1;
-                if (senderId.Value != Id) continue;
 
+                if (senderId.Value != Id)
+                {
+                    Debug.Log($"Skipped: {senderId}");
+                    continue;
+                }
                 GameObject repSphere = player.Item2;
 
-                repSphere.transform.position = playerData.position.ToVec3();
+                //repSphere.transform.position = playerData.position.ToVec3();
                 player.Item3.Move(playerData.position.ToVec3(), playerData.velocity.ToVec3(), playerData.properties);
             }
         });

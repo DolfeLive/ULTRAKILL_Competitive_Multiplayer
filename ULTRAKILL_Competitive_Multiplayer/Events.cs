@@ -101,6 +101,8 @@ public class PlayerMoveEvent
 public class LookEvent
 {
     public SerializableVec3 Dir;
+
+    public LookEvent(SerializableVec3 dir) { Dir = dir; }
 }
 
 [Serializable]
