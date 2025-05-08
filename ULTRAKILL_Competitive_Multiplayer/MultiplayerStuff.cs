@@ -93,9 +93,9 @@ public class MultiplayerStuff : MonoBehaviour
 
             RepresentaiveObjectStuff(senderId);
 
-            foreach ((uint, GameObject, Player) player in representativeObjects)
+            foreach ((SteamId, GameObject, Player) player in representativeObjects)
             {
-                uint Id = player.Item1;
+                ulong Id = player.Item1;
 
                 if (senderId.Value != Id)
                 {
@@ -120,9 +120,9 @@ public class MultiplayerStuff : MonoBehaviour
 
             RepresentaiveObjectStuff(senderId);
 
-            foreach ((uint, GameObject, Player) player in representativeObjects)
+            foreach ((SteamId, GameObject, Player) player in representativeObjects)
             {
-                uint Id = player.Item1;
+                SteamId Id = player.Item1;
                 if (senderId != Id) continue;
 
                 //GameObject repSphere = player.Item2;
@@ -143,9 +143,9 @@ public class MultiplayerStuff : MonoBehaviour
 
             RepresentaiveObjectStuff(senderId);
 
-            foreach ((uint, GameObject, Player) player in representativeObjects)
+            foreach ((SteamId, GameObject, Player) player in representativeObjects)
             {
-                uint Id = player.Item1;
+                SteamId Id = player.Item1;
                 if (senderId != Id) continue;
 
                 GameObject repSphere = player.Item2;
