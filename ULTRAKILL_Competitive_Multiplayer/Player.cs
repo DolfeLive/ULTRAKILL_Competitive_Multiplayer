@@ -45,6 +45,8 @@ public class Player : MonoBehaviour
 
     public void Start()
     {
+        rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
         V2 v = GetComponent<V2>();
         Player.DodgeEffect = v.dodgeEffect;
         Player.SlideEffect = v.slideEffect;
@@ -56,7 +58,6 @@ public class Player : MonoBehaviour
         Player.aimAtTarget = v.aimAtTarget.ToList();
         Player.Smr = v.smr;
 
-        rb = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
         
         anim.SetBool("InAir", true);
@@ -67,8 +68,7 @@ public class Player : MonoBehaviour
             anim.SetLayerWeight(1, 0f);
             anim.SetLayerWeight(2, 0f);
         }
-
-        rb.isKinematic = true;
+        //rb.isKinematic = false;
         v.enabled = false;
     }
 
@@ -84,8 +84,8 @@ public class Player : MonoBehaviour
 
     public void Move(Vector3 pos, Vector3 Vel, byte properties)
     {
-        position = pos;
-        velocity = Vel;
+        position = pos + new Vector3(0f, -1.55f, 0f);
+        //velocity = Vel;
         //Debug.Log($"Moved");
 
         // { jumping, dashing, SSJing, Sliding, Slamming }
@@ -100,11 +100,11 @@ public class Player : MonoBehaviour
 
     public void Aim(Vector3 Rot)
     {
-        rotation = Rot;
+        rotation = new(0, Rot.y, 0);
         if (aimAtTarget != null && aimAtTarget.Count > 0 && aimAtTarget[0] != null)
         {
-            aimAtTarget[0].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Head
-            aimAtTarget[1].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Arm
+            aimAtTarget[0].localRotation = Quaternion.Euler(-Rot.x + 20f, 0, 0); // Head
+            aimAtTarget[1].localRotation = Quaternion.Euler(Rot.x, 0, 0f); // Arm
         }
         //Debug.Log($"Aimed");
     }
