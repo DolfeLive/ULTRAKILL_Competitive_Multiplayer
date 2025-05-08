@@ -4,9 +4,7 @@ using UnityEngine;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
-public interface IPlayer { }
-
-public class Player : MonoBehaviour, IPlayer
+public class Player : MonoBehaviour
 {
     public static GameObject DodgeEffect;
     public static GameObject SlideEffect;
