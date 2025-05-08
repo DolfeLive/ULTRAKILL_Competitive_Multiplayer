@@ -16,7 +16,6 @@ namespace ULTRAKILL_Competitive_Multiplayer;
 
 public class MultiplayerStuff : MonoBehaviour
 {
-    public bool DoPlayerStuff = true;
 
     public List<(SteamId, GameObject, Player)> representativeObjects = new();
     
@@ -39,20 +38,20 @@ public class MultiplayerStuff : MonoBehaviour
         {
             try
             {
-                if (DoPlayerStuff && NewMovementExists && CompMultiplayerMain.instance.inMultiplayerScene)
+                if (NewMovementExists && CompMultiplayerMain.instance.inMultiplayerScene)
                 {
                     // { jumping, dashing, SSJing, Sliding, Slamming }
                     PlayerMoveEvent move = new(nm.transform.position.ToSVec3(), nm.rb.velocity.ToSVec3(), boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
                     LookEvent lookEvent = new(new SerializableVec3(nm.cc.rotationX, nm.cc.rotationY, 0));
-                    ReliableStateInfo rsi = new(boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
+                    //ReliableStateInfo rsi = new(boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
 
                     MU.LobbyManager.SendData(move, SendMethod.UnreliableNoDelay);
                     MU.LobbyManager.SendData(lookEvent, SendMethod.UnreliableNoDelay);
-                    MU.LobbyManager.SendData(rsi, SendMethod.Reliable);
+                    //MU.LobbyManager.SendData(rsi, SendMethod.Reliable);
 
                     sent++;
-                    if (sent % 500 == 0)
-                        Debug.Log($"Sending data move pos: {move.position}, look pos: {lookEvent.Dir}, rsi: {rsi}");
+                    if (sent % 1000 == 0)
+                        Debug.Log($"Sending data move pos: {move.position}, look pos: {lookEvent.Dir}");
 
                 }
             }
@@ -87,7 +86,7 @@ public class MultiplayerStuff : MonoBehaviour
         {
             var playerData = Data.Deserialize<PlayerMoveEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            print($"player Pos recived: ({playerData.position.ToVec3()}, Sender id: {senderId}");
+            //print($"player Pos recived: ({playerData.position.ToVec3()}, Sender id: {senderId}");
 
             if (senderId == LobbyManager.selfID) return;
 
@@ -99,7 +98,6 @@ public class MultiplayerStuff : MonoBehaviour
 
                 if (senderId.Value != Id)
                 {
-                    Debug.Log($"Skipped: {senderId}");
                     continue;
                 }
                 GameObject repSphere = player.Item2;
@@ -114,7 +112,7 @@ public class MultiplayerStuff : MonoBehaviour
         {
             var playerData = Data.Deserialize<LookEvent>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            print($"player look Dir: ({playerData.Dir}, Sender id: {senderId}");
+            //print($"player look Dir: ({playerData.Dir}, Sender id: {senderId}");
 
             if (senderId == LobbyManager.selfID) return;
 
@@ -137,7 +135,7 @@ public class MultiplayerStuff : MonoBehaviour
         {
             var playerData = Data.Deserialize<ReliableStateInfo>(_.Item1);
             SteamId senderId = _.Item2.Value;
-            print($"player reliable info: ({playerData.properties}, Sender id: {senderId}");
+            //print($"player reliable info: ({playerData.properties}, Sender id: {senderId}");
 
             if (senderId == LobbyManager.selfID) return;
 
@@ -229,7 +227,6 @@ public class MultiplayerStuff : MonoBehaviour
 
                 GameObject repSphere = player.Item2;
 
-                Debug.Log("Set pos");
                 repSphere.transform.position = nm.transform.position + new Vector3(5, 0, 0);
             }
         }

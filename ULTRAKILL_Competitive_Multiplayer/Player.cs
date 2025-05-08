@@ -86,7 +86,7 @@ public class Player : MonoBehaviour
     {
         position = pos;
         velocity = Vel;
-        Debug.Log($"Moved");
+        //Debug.Log($"Moved");
 
         // { jumping, dashing, SSJing, Sliding, Slamming }
 
@@ -100,12 +100,13 @@ public class Player : MonoBehaviour
 
     public void Aim(Vector3 Rot)
     {
+        rotation = Rot;
         if (aimAtTarget != null && aimAtTarget.Count > 0 && aimAtTarget[0] != null)
         {
             aimAtTarget[0].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Head
             aimAtTarget[1].localRotation = Quaternion.Euler(Rot.x, Rot.y, 0f); // Arm
         }
-        Debug.Log($"Aimed");
+        //Debug.Log($"Aimed");
     }
 
 
