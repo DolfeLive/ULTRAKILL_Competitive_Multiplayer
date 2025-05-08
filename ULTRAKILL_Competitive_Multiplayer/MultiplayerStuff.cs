@@ -74,6 +74,8 @@ public class MultiplayerStuff : MonoBehaviour
             }
         });
 
+        #endregion
+
         #region data Recive Callbacks
 
         MU.ObserveManager.SubscribeToType(typeof(PlayerMoveEvent), out Callbacks.SenderUnityEvent PlayerDetected);
@@ -143,6 +145,8 @@ public class MultiplayerStuff : MonoBehaviour
                 player.Item3.ReliableStateInfo(playerData.properties);
             }
         });
+
+        #endregion
 
         #region Lobby callbacks
 
