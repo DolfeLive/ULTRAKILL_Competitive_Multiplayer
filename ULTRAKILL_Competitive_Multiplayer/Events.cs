@@ -103,7 +103,18 @@ public class LookEvent
     public SerializableVec3 Dir;
 }
 
-
+[Serializable]
+public class ReliableStateInfo
+{
+    public byte properties; // { jumping, dashing, SSJing, Sliding, Slamming }
+    /// <summary>
+    /// </summary>
+    /// <param name="properties">{ jumping, dashing, SSJing, Sliding, Slamming }</param>
+    public ReliableStateInfo(byte properties)
+    {
+        this.properties = properties;
+    }
+}
 
 [Serializable]
 public class WeaponChangeEvent

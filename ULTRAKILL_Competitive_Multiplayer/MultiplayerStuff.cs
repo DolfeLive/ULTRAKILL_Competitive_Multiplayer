@@ -32,6 +32,8 @@ public class MultiplayerStuff : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         gameObject.hideFlags = HideFlags.HideAndDontSave;
 
+        #region Data Send Callbacks
+
         MU.Callbacks.TimeToSendImportantData.AddListener(() =>
         {
             try
@@ -43,12 +45,11 @@ public class MultiplayerStuff : MonoBehaviour
                     LookEvent lookEvent = new();
                     lookEvent.Dir = new SerializableVec3(nm.cc.rotationX, nm.cc.rotationY, 0);
 
-                    //amtSent++;
-                    //if (amtSent % 500 == 0)
-                    //    Debug.Log($"Sending player pos: ({player.RotationX}, {player.PositionY}, {player.PositionZ})");
+                    ReliableStateInfo rsi = new(boolsToBinary(new bool[] { nm.jumping, nm.boost, nm.slamStorage, nm.sliding, nm.slamForce > 0.1f }));
 
                     MU.LobbyManager.SendData(move, SendMethod.UnreliableNoDelay);
                     MU.LobbyManager.SendData(lookEvent, SendMethod.UnreliableNoDelay);
+                    MU.LobbyManager.SendData(rsi, SendMethod.Reliable);
 
                 }
             }
@@ -73,6 +74,8 @@ public class MultiplayerStuff : MonoBehaviour
             }
         });
 
+        #region data Recive Callbacks
+
         MU.ObserveManager.SubscribeToType(typeof(PlayerMoveEvent), out Callbacks.SenderUnityEvent PlayerDetected);
         PlayerDetected.AddListener(_ =>
         {
@@ -91,8 +94,8 @@ public class MultiplayerStuff : MonoBehaviour
 
                 GameObject repSphere = player.Item2;
 
-
                 repSphere.transform.position = playerData.position.ToVec3();
+                player.Item3.Move(playerData.position.ToVec3(), playerData.velocity.ToVec3(), playerData.properties);
             }
         });
 
@@ -115,9 +118,33 @@ public class MultiplayerStuff : MonoBehaviour
                 GameObject repSphere = player.Item2;
 
                 repSphere.transform.rotation = Quaternion.Euler(playerData.Dir.ToVec3());
+                player.Item3.Aim(playerData.Dir.ToVec3());
             }
         });
 
+        MU.ObserveManager.SubscribeToType(typeof(ReliableStateInfo), out Callbacks.SenderUnityEvent reliableState);
+        reliableState.AddListener(_ =>
+        {
+            var playerData = Data.Deserialize<ReliableStateInfo>(_.Item1);
+            SteamId senderId = _.Item2.Value;
+            print($"player reliable info: ({playerData.properties}, Sender id: {senderId}");
+
+            if (senderId == LobbyManager.selfID) return;
+
+            RepresentaiveObjectStuff(senderId);
+
+            foreach ((uint, GameObject, Player) player in representativeObjects)
+            {
+                uint Id = player.Item1;
+                if (senderId != Id) continue;
+
+                GameObject repSphere = player.Item2;
+
+                player.Item3.ReliableStateInfo(playerData.properties);
+            }
+        });
+
+        #region Lobby callbacks
 
         MU.Callbacks.OnLobbyMemberJoined.AddListener((lobby, friend) =>
         {
@@ -167,6 +194,7 @@ public class MultiplayerStuff : MonoBehaviour
             Debug.Log("Lobby Entered");
         });
 
+        #endregion
     }
 
     void Update()
@@ -201,7 +229,7 @@ public class MultiplayerStuff : MonoBehaviour
         if (!representativeObjects.Any(p => p.Item1 == senderId))
         {
             GameObject repSphere = Instantiate(CompMultiplayerMain.playerGO, Vector3.zero, Quaternion.identity);
-            PrintHierarchy(repSphere.transform, 0);
+            //PrintHierarchy(repSphere.transform, 0);
             Player player = repSphere.AddComponent<Player>();
             repSphere.name = $"Rep_{senderId}";
             representativeObjects.Add((senderId, repSphere, player));

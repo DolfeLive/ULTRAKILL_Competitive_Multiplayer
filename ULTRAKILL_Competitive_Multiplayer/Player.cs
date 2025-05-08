@@ -60,7 +60,6 @@ public class Player : MonoBehaviour, IPlayer
 
         rb = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
-
         
         anim.SetBool("InAir", true);
         anim.SetBool("Sliding", false);
@@ -70,6 +69,7 @@ public class Player : MonoBehaviour, IPlayer
             anim.SetLayerWeight(1, 0f);
             anim.SetLayerWeight(2, 0f);
         }
+
         rb.isKinematic = true;
         v.enabled = false;
     }
@@ -84,10 +84,19 @@ public class Player : MonoBehaviour, IPlayer
 
     }
 
-    public void Move(Vector3 pos, Vector3 Vel)
+    public void Move(Vector3 pos, Vector3 Vel, byte properties)
     {
         position = pos;
         velocity = Vel;
+
+        // { jumping, dashing, SSJing, Sliding, Slamming }
+        
+    }
+
+    public void ReliableStateInfo(byte properties)
+    {
+        // { jumping, dashing, SSJing, Sliding, Slamming }
+
     }
 
     public void Aim(Vector3 Rot)
