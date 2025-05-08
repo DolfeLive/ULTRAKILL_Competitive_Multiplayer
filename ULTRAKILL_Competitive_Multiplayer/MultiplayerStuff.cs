@@ -26,6 +26,8 @@ public class MultiplayerStuff : MonoBehaviour
 
     bool NewMovementExists => NewMovement.instance != null;
     NewMovement nm = NewMovement.instance;
+
+    int sent = 0;
     void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -49,6 +51,10 @@ public class MultiplayerStuff : MonoBehaviour
                     MU.LobbyManager.SendData(move, SendMethod.UnreliableNoDelay);
                     MU.LobbyManager.SendData(lookEvent, SendMethod.UnreliableNoDelay);
                     MU.LobbyManager.SendData(rsi, SendMethod.Reliable);
+
+                    sent++;
+                    if (sent % 500 == 0)
+                        Debug.Log($"Sending data move pos: {move.position}, look pos: {lookEvent.Dir}, rsi: {rsi}");
 
                 }
             }
