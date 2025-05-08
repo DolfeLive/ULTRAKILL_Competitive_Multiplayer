@@ -762,13 +762,16 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             
             try
             {
+                int seed = 0;
+                System.Random rand = new(seed);
+
                 int[] heights = ParseRowHeights(pattern.name, rows[i], i);
                 
                 for (int j = 0; j < heights.Length && j < gridWidth; j++)
                 {
                     if (cubes[i] != null && cubes[i][j] != null)
                     {
-                        cubes[i][j].SetTarget(heights[j] * cubeOffset / 2f);
+                        cubes[i][j].SetTarget(heights[j] * cubeOffset / 2f, rand);
                         cubes[i][j].blockedByPrefab = false;
                         incompleteBlocks++;
                     }

@@ -238,7 +238,13 @@ public static class RespawnPatch
 public static class GuncSwitchWeaponPatch
 {
     [HarmonyPostfix]
-    public static void SwitchWeaponPatch(GunControl __instance, int __targetSlotIndex, int? __targetVariationIndex = null, bool __useRetainedVariation = false, bool __cycleSlot = false, bool __cycleVariation = false)
+    public static void SwitchWeaponPatch(
+        GunControl __instance,
+        int targetSlotIndex,
+        int? targetVariationIndex,
+        bool useRetainedVariation,
+        bool cycleSlot,
+        bool cycleVariation)
     {
         MultiplayerStuff.OnWeaponChange(__instance.currentSlotIndex, __instance.currentVariationIndex);
     }
