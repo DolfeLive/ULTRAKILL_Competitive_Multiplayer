@@ -2,11 +2,18 @@ A Ultrakill mod for PVP using Steamworks for multiplayer
 
 TODO:
 ```
-Player Models
+Player Animatons
 More things to sync
 Load assetbundles from the mod internally
 More settings and persistant settings config
-Make a bunch of the cybergrind code and other bits async
+Make a bunch of the cybergrind code and other bits async (didnt really work out)
+Guns to worK: {
+have rep players have each gun and variation
+have shots get passed through
+have the lobby owner validate the shot and have the visual shot effect get sent to everyone
+}
+
+Clean up codebase
 ```
 
 Planned:
@@ -17,7 +24,7 @@ Arena changes during the match
 Death cam (you can see last few seconds b4 enem kills you)
 Harmony patches for everything needed
 optional rounds system
-
+Capture the filth (flag)
 ```
 
 Possible ideas:
