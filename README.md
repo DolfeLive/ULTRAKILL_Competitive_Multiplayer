@@ -24,14 +24,15 @@ Arena changes during the match
 Death cam (you can see last few seconds b4 enem kills you)
 Harmony patches for everything needed
 optional rounds system
-Capture the filth (flag)
+Capture the filth (flag), (probably pick up filth with the move arm, preventing the use of weapons)
+Forces to keep players near arena
+Easy way to add new options to the lobby creation process
 ```
 
 Possible ideas:
 ```
 players deal hard damage
 players have 200 health instead of 100? or just guns dmg gets nerfed in pvp
-Forces to keep players near arena
 ```
 
 Need ideas for:
