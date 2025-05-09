@@ -29,6 +29,8 @@ public class MultiplayerStuff : MonoBehaviour
     int sent = 0;
     void Start()
     {
+        Application.runInBackground = true;
+        
         DontDestroyOnLoad(gameObject);
         gameObject.hideFlags = HideFlags.HideAndDontSave;
 
@@ -79,7 +81,7 @@ public class MultiplayerStuff : MonoBehaviour
         #endregion
 
         #region data Recive Callbacks
-        MU.ObserveManager.MessageReceivedLogging = true;
+        //MU.ObserveManager.MessageReceivedLogging = true;
 
         MU.ObserveManager.SubscribeToType(typeof(PlayerMoveEvent), out Callbacks.SenderUnityEvent PlayerDetected);
         PlayerDetected.AddListener(_ =>
