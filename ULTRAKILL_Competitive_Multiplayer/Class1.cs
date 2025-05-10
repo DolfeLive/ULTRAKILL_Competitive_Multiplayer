@@ -470,16 +470,16 @@ Jsss000000000000";
         {
             print("Bootstrap loaded");
 
-            [DllImport("user32.dll")]
-            static extern IntPtr GetActiveWindow();
+            //[DllImport("user32.dll")]
+            //static extern IntPtr GetActiveWindow();
 
-            [DllImport("user32.dll")]
-            static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+            //[DllImport("user32.dll")]
+            //static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-            const int SW_MAXIMIZE = 3;
+            //const int SW_MAXIMIZE = 3;
             
-            IntPtr windowHandle = GetActiveWindow();
-            ShowWindow(windowHandle, SW_MAXIMIZE);
+            //IntPtr windowHandle = GetActiveWindow();
+            //ShowWindow(windowHandle, SW_MAXIMIZE);
         }
     }
 
