@@ -91,6 +91,6 @@
 
   <Target Name="PostBuild" AfterTargets="Build">
     <Copy SourceFiles="$(TargetDir)ULTRAKILL_Competitive_Multiplayer.dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\BepInEx\plugins\" />
+	<Exec Command="start &quot;ULTRAKILL&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\ULTRAKILL.exe&quot;" IgnoreExitCode="true" />
   </Target>
-
 </Project>

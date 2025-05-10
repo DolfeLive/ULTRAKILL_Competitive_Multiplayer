@@ -68,7 +68,7 @@ public class CompMultiplayerMain : BaseUnityPlugin
         har.PatchAll();
 
         SceneManager.sceneLoaded += OnSceneLoaded;
-
+        print("test");
         string bundlePath = Paths.PluginPath;
         LoadAssets(bundlePath);
         //InvokePrivate<MyTargetClass>(null, "MyPrivateStaticMethod", new object[] { "Hello, world!" });
