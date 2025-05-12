@@ -182,7 +182,7 @@ public class MultiplayerStuff : MonoBehaviour
 
         MU.Callbacks.OnLobbyMemberLeave.AddListener((friend) =>
         {
-            var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.AccountId == friend.Value);
+            var repObject = representativeObjects.FirstOrDefault(_ => _.Item1.Value == friend.Value);
             if (repObject != default)
             {
                 Destroy(repObject.Item2);
@@ -214,7 +214,6 @@ public class MultiplayerStuff : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.I))
         {
             GameObject repSphere = Instantiate(CompMultiplayerMain.playerGO, Vector3.zero, Quaternion.identity);
-            //PrintHierarchy(repSphere.transform, 0);
             Player player = repSphere.AddComponent<Player>();
             repSphere.name = $"Rep_awdawdawd";
             representativeObjects.Add((0987654567, repSphere, player));
@@ -232,7 +231,7 @@ public class MultiplayerStuff : MonoBehaviour
                 repSphere.transform.position = nm.transform.position + new Vector3(5, 0, 0);
             }
         }
-
+        Time.timeScale = 1f;
     }
 
     void RepresentaiveObjectStuff(SteamId senderId)
