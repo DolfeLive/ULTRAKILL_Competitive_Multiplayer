@@ -19,6 +19,7 @@ using Unity.AI.Navigation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using UnityEngine.AddressableAssets;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
@@ -642,6 +643,43 @@ Jsss000000000000";
         DontDestroyOnLoad(multiplayerStuff);
 
         Debug.Log("DoCGStuff completed");
+
+        CityShader();
+    }
+
+    void CityShader()
+    {
+        Transform cityTransform = transform.Find("/LustCity");
+        if (cityTransform == null)
+        {
+            Debug.LogError("Transform 'LustCity' not found.");
+            return;
+        }
+
+        GameObject cityObject = cityTransform.gameObject;
+        if (cityObject == null)
+        {
+            Debug.LogError("GameObject for 'LustCity' is null.");
+            return;
+        }
+
+        MeshRenderer meshRenderer = cityObject.GetComponent<MeshRenderer>();
+        if (meshRenderer == null)
+        {
+            Debug.LogError("MeshRenderer not found on 'LustCity'.");
+            return;
+        }
+        List<Material> mats = new List<Material>();
+        mats.Add(meshRenderer.sharedMaterials[1]);
+
+        Shader loadedShader = Addressables.LoadAssetAsync<Shader>("Assets/Shaders/MasterShader/ULTRAKILL-Standard.shader").WaitForCompletion();
+        if (loadedShader == null)
+        {
+            Debug.LogError("Shader failed to load from Addressables.");
+            return;
+        }
+
+        mats[0].shader = loadedShader;
     }
 
     void OpenMultiMenu()
