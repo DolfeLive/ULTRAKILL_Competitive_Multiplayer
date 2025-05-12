@@ -307,4 +307,14 @@ public class MultiplayerStuff : MonoBehaviour
         }
         return binary;
     }
+
+    public static bool[] byteToBools(byte data)
+    {
+        bool[] result = new bool[8];
+        for (int i = 0; i < 8; i++)
+        {
+            result[i] = (data & (1 << i)) != 0;
+        }
+        return result;
+    }
 }

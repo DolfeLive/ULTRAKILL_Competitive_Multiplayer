@@ -43,11 +43,6 @@ public class LobbyCreate : MonoBehaviour
         mods = transform.Find("Mods Toggle").GetComponent<Toggle>().isOn;
     }
 
-    void Cheats()
-    {
-        cheats = transform.Find("Cheats Toggle").GetComponent<Toggle>().isOn;
-    }
-
     public async void CreateLobby()
     {
         Clogger.Log("Create lobby button clicked");
@@ -55,10 +50,9 @@ public class LobbyCreate : MonoBehaviour
         Lobby_Name();
         Max_Players();
         Public_Lobby();
-        Cheats();
         Mods();
 
-        MultiplayerUtil.LobbyManager.CreateLobby(LobbyName, maxPlayers, publicLobby, cracked, cheats, mods, ("UKCM", "EtcEtc"));
+        MultiplayerUtil.LobbyManager.CreateLobby(LobbyName, maxPlayers, publicLobby, cracked, mods, ("UKCM", "EtcEtc"));
         CompMultiplayerMain.instance.LoadMultiplayerScene();
     }
 
