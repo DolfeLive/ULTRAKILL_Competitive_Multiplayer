@@ -57,6 +57,7 @@ public class LobbyCreate : MonoBehaviour
         Public_Lobby();
         Cheats();
         Mods();
+        Logger.Log($"Hosting Lobby: LobbyName: {LobbyName}, maxPlayers: {maxPlayers}, publicLobby: {publicLobby}, cracked: {cracked}, cheats: {cheats}, mods: {mods}");
 
         MultiplayerUtil.LobbyManager.CreateLobby(LobbyName, maxPlayers, publicLobby, cracked, cheats, mods, ("UKCM", "EtcEtc"));
         CompMultiplayerMain.instance.LoadMultiplayerScene();

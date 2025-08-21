@@ -26,10 +26,11 @@ public class LobbyList : MonoBehaviour
     }
     public async void FetchLobbies()
     {
+        Clogger.Log("fetching lobbies");
         FetchingLobbies = true;
         try
         {
-            List<Lobby> getthingy = getthingy = await MultiplayerUtil.LobbyManager.FetchLobbies(("UKCM", "EtcEtc"));
+            foundLobbies = await MultiplayerUtil.LobbyManager.FetchLobbies(("UKCM", "EtcEtc"));
         }
         catch (Exception e)
         {
