@@ -28,6 +28,12 @@ public class LobbyList : MonoBehaviour
     {
         Clogger.Log("fetching lobbies");
         FetchingLobbies = true;
+        
+        foreach (KeyValuePair<Transform, Lobby> KVP in lobbies)
+        {
+            Destroy(KVP.Key.gameObject);
+        }
+
         try
         {
             foundLobbies = await MultiplayerUtil.LobbyManager.FetchLobbies(("UKCM", "EtcEtc"));
@@ -37,12 +43,8 @@ public class LobbyList : MonoBehaviour
             Clogger.LogError($"Lobby finding exeption: {e}");
         }
         
-        foreach (KeyValuePair<Transform, Lobby> KVP in lobbies)
-        {
-            Destroy(KVP.Key.gameObject);
-        }
 
-        //Clogger.Log($"Found Lobbies: {foundLobbies.Count}");
+        Clogger.Log($"Found Lobbies: {foundLobbies.Count}");
 
         foreach (Lobby lob in foundLobbies)
         {
@@ -99,5 +101,6 @@ class LobbyButton : MonoBehaviour
         ulong.TryParse(lobbyId, out ulong id);
         
         SteamManager.instance.JoinLobbyWithID(id);
+        CompMultiplayerMain.instance.LoadMultiplayerScene();
     }
 }

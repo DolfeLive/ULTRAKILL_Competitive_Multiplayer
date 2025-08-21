@@ -51,6 +51,9 @@
     <Reference Include="UnityEngine">
       <HintPath>C:\UltrakillDeps\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>C:\UltrakillDeps\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>C:\UltrakillDeps\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
@@ -88,6 +91,6 @@
 
   <Target Name="PostBuild" AfterTargets="Build">
     <Copy SourceFiles="$(TargetDir)ULTRAKILL_Competitive_Multiplayer.dll" DestinationFolder="C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\BepInEx\plugins\" />
+	<Exec Command="start &quot;ULTRAKILL&quot; &quot;C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\ULTRAKILL.exe&quot;" IgnoreExitCode="true" />
   </Target>
-
 </Project>

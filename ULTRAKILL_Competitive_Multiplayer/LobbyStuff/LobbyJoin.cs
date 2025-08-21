@@ -16,6 +16,7 @@ public class LobbyJoin : MonoBehaviour
         if (ulong.TryParse(transform.Find("CodeInput").GetComponent<InputField>().text, out ulong lobbyId))
         {
             MultiplayerUtil.LobbyManager.JoinLobbyWithID(lobbyId);
+            CompMultiplayerMain.instance.LoadMultiplayerScene();
         }
         else
         {

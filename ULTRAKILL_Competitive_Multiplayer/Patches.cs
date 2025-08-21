@@ -205,12 +205,6 @@ public static class NextWavePatches
     }
 }
 
-/*
-[Error  : Unity Log] MissingFieldException: Field not found: UnityEngine.GameObject .NewMovement.deathSequence Due to: Could not find field in class
-Stack trace:
-ULTRAKILL_Competitive_Multiplayer.RespawnPatch.UpdatePatch (StatsManager __instance) (at <c7557ae6b06c4600938bf5867ead8fe0>:0)
-(wrapper dynamic-method) StatsManager.DMD<StatsManager::Update>(StatsManager)
-*/
 [HarmonyPatch(typeof(StatsManager), "Update")]
 public static class RespawnPatch
 {
@@ -240,6 +234,21 @@ public static class RespawnPatch
     }
 }
 
+[HarmonyPatch(typeof(GunControl), "SwitchWeapon")]
+public static class GuncSwitchWeaponPatch
+{
+    [HarmonyPostfix]
+    public static void SwitchWeaponPatch(
+        GunControl __instance,
+        int targetSlotIndex,
+        int? targetVariationIndex,
+        bool useRetainedVariation,
+        bool cycleSlot,
+        bool cycleVariation)
+    {
+        MultiplayerStuff.OnWeaponChange(__instance.currentSlotIndex, __instance.currentVariationIndex);
+    }
+}
 
 
 // Add patches for: player speed, rocket riding, bullets, damage receiving, shotgun bullet location rng and TimeController

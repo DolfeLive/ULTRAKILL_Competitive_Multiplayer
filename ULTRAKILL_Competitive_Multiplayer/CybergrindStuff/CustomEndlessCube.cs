@@ -63,13 +63,13 @@ public class CustomEndlessCube : MonoBehaviour
         }
     }
 
-    public void SetTarget(float target)
+    public void SetTarget(float target, System.Random random)
     {
         if (tf == null) tf = transform;
 
         targetPos = new Vector3(tf.position.x, target, tf.position.z);
-        speed = Random.Range(9, 11);
-        Invoke("StartMoving", Random.Range(0f, 0.5f));
+        speed = random.Next(9, 11);
+        Invoke("StartMoving", (float)random.NextDouble() * 0.5f);
     }
 
     public void StartMoving()

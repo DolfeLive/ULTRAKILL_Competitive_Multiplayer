@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Unity.AI.Navigation;
+//using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
+using UnityEngine.AddressableAssets;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
@@ -25,7 +26,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     public CustomEndlessCube[][] cubes;
     private int incompleteBlocks;
     private ArenaPattern currentPattern;
-    public NavMeshSurface nms;
+    //public NavMeshSurface nms;
     public int currentPatternNum = -1;
     public List<GameObject> spawnedPrefabs = new List<GameObject>();
     private int incompletePrefabs;
@@ -58,6 +59,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
     private static readonly int GradientScale = Shader.PropertyToID("_GradientScale");
 
     private static readonly int PcGamerMode = Shader.PropertyToID("_PCGamerMode");
+    
 
     public ArenaPattern[] CurrentPatternPool
     {
@@ -85,7 +87,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             return;
         }
         
-        this.nms = base.GetComponent<NavMeshSurface>();
+        //this.nms = base.GetComponent<NavMeshSurface>();
         this.gz = GoreZone.ResolveGoreZone(base.transform);
         
         this.cubes = new CustomEndlessCube[gridHeight][];
@@ -129,14 +131,17 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         foreach (Material material in this.mats)
         {
             material.SetColor(UKShaderProperties.EmissiveColor, Color.blue);
-            material.SetFloat(UKShaderProperties.EmissiveIntensity, 0.2f * this.glowMultiplier);
-            material.SetFloat("_PCGamerMode", 0f);
-            material.SetFloat("_GradientScale", 2f);
+            material.SetFloat(UKShaderProperties.EmissiveIntensity, 1f);
+            material.SetFloat("_PCGamerMode", 1);
+            material.SetFloat("_GradientScale", 0.5f);
             material.SetFloat("_GradientFalloff", 5f);
-            material.SetFloat("_GradientSpeed", 10f);
-            material.SetVector("_WorldOffset", new Vector4(0f, 0f, 62.5f, 0f));
+            material.SetFloat("_GradientSpeed", 25f);
+            material.SetVector("_WorldOffset", new Vector4(0f, 27f, 62.5f, 0f));
             this.targetColor = Color.blue;
+            material.enableInstancing = true;
         }
+        //Shader vertCyber = Addressables.LoadAssetAsync<Shader>("Assets/Shaders/Special/ULTRAKILL-vertexlit-cyber.shader").WaitForCompletion();
+        //print($"vert cyber: {vertCyber != null}");
         this.TrySetupStaticGridMesh();
     }
     
@@ -160,7 +165,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         combinedGridStaticObject.transform.localScale = Vector3.one;
         
         List<Material> materials = GetMaterialsFromCubes();
-        
+
         List<Mesh> submeshes = CreateSubmeshes(materials);
         
         CombineSubmeshes(submeshes, materials);
@@ -173,7 +178,21 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         
         stopwatch.Stop();
         Debug.Log($"Combined arena mesh in {stopwatch.Elapsed.TotalMilliseconds:N5} ms");
-        
+
+        this.mats = base.GetComponentInChildren<MeshRenderer>().sharedMaterials;
+        foreach (Material material in this.mats)
+        {
+            material.SetColor(UKShaderProperties.EmissiveColor, Color.blue);
+            material.SetFloat(UKShaderProperties.EmissiveIntensity, 1f);
+            material.SetFloat("_PCGamerMode", 1);
+            material.SetFloat("_GradientScale", 0.5f);
+            material.SetFloat("_GradientFalloff", 5f);
+            material.SetFloat("_GradientSpeed", 25f);
+            material.SetVector("_WorldOffset", new Vector4(0f, 27f, 62.5f, 0f));
+            this.targetColor = Color.blue;
+            material.enableInstancing = true;
+        }
+
         UpdatePhysics();
     }
 
@@ -442,16 +461,7 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         combinedGridStaticObject.SetActive(true);
         combinedGridStaticMeshFilter.sharedMesh = combinedGridStaticMesh;
     }
-    void PrintHierarchy(Transform current, int depth)
-    {
-        string indent = new string(' ', depth * 2);
-        Debug.Log(indent + current.name);
-
-        foreach (Transform child in current)
-        {
-            PrintHierarchy(child, depth + 1);
-        }
-    }
+    
     public void OneDone()
     {
         jumpPadSelector = 0;
@@ -640,6 +650,16 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
         return null;
     }
 
+    void Update()
+    {
+        NewMovement nm = NewMovement.instance;
+        Material[] array = this.mats;
+        for (int i = 0; i < array.Length; i++)
+        {
+            array[i].SetVector(WorldOffset, new Vector4(nm.transform.position.x, nm.transform.position.y, nm.transform.position.z, 0f));
+        }
+    }
+     
     private void UpdatePhysics()
     {
         if (combinedGridStaticObject.TryGetComponent<PhysicsSceneStateEnforcer>(out PhysicsSceneStateEnforcer enforcer))
@@ -735,13 +755,16 @@ public class CustomCybergrind : MonoSingleton<CustomCybergrind>
             
             try
             {
+                int seed = 0;
+                System.Random rand = new(seed);
+
                 int[] heights = ParseRowHeights(pattern.name, rows[i], i);
                 
                 for (int j = 0; j < heights.Length && j < gridWidth; j++)
                 {
                     if (cubes[i] != null && cubes[i][j] != null)
                     {
-                        cubes[i][j].SetTarget(heights[j] * cubeOffset / 2f);
+                        cubes[i][j].SetTarget(heights[j] * cubeOffset / 2f, rand);
                         cubes[i][j].blockedByPrefab = false;
                         incompleteBlocks++;
                     }

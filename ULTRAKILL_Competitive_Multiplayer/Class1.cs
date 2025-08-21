@@ -19,6 +19,7 @@ using Unity.AI.Navigation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using UnityEngine.AddressableAssets;
 
 namespace ULTRAKILL_Competitive_Multiplayer;
 
@@ -38,14 +39,24 @@ public class CompMultiplayerMain : BaseUnityPlugin
 
     public static AssetBundle AssetsBundle;
     public static AssetBundle sceneBundle;
+    public static AssetBundle playerBundle;
 
     GameObject MultiplayerMenu;
     public static GameObject MultiplayerModel;
     GameObject MMObject;
     public static GameObject LobbyPrefab;
     public static GameObject LobbyParent;
+    public static GameObject playerGO;
 
     private LobbyList? lobbyList;
+    private GameObject multiplayerStuff;
+
+    public List<ArenaPattern> patterns = new();
+    int patternIndex = 0;
+
+    NewMovement nm;
+
+    int deaths = 0;
 
     void Awake()
     {
@@ -58,7 +69,7 @@ public class CompMultiplayerMain : BaseUnityPlugin
         har.PatchAll();
 
         SceneManager.sceneLoaded += OnSceneLoaded;
-
+        print("test");
         string bundlePath = Paths.PluginPath;
         LoadAssets(bundlePath);
         //InvokePrivate<MyTargetClass>(null, "MyPrivateStaticMethod", new object[] { "Hello, world!" });
@@ -187,12 +198,12 @@ Jsss000000000000";
         MultiplayerUtil.LobbyManager.ReInnitSteamClient(newVal);
         lobbyList?.FetchLobbies();
     }
-
-
+    
     void LoadAssets(string path)
     {
         AssetsBundle = AssetBundle.LoadFromFile(Path.Combine(path, "ukcm.ukcm"));
         sceneBundle = AssetBundle.LoadFromFile(Path.Combine(path, "level.meatgrinder"));
+        playerBundle = AssetBundle.LoadFromFile(Path.Combine(path, "player.player"));
 
         if (AssetsBundle == null)
         {
@@ -203,21 +214,12 @@ Jsss000000000000";
         LobbyPrefab = AssetsBundle.LoadAsset<GameObject>("Lobby");
         MultiplayerMenu = AssetsBundle.LoadAsset<GameObject>("Multiplayer Menu");
         MultiplayerModel = AssetsBundle.LoadAsset<GameObject>("MultiplayerModelV2");
+        playerGO = playerBundle.LoadAsset<GameObject>("Player");
     }
+
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            NewMovement.Instance.GetHurt(1000, false);
-        }
-        else if (Input.GetKeyDown(KeyCode.P))
-        {
-            print($"Respawned, deaths: {deaths}");
-
-            NewMovementRespawn();
-            
-        }
-        else if (Input.GetKeyDown(KeyCode.O))
+        if (Input.GetKeyDown(KeyCode.O))
         { 
             print($"Pat indx: {patternIndex}, patterns cnt: {patterns.Count}, patterns: {patterns.Select(_ => _.name)}");
             patternIndex++;
@@ -235,15 +237,9 @@ Jsss000000000000";
             cybergrind.LoadPattern(patterns[patternIndex]);
         }
     }
-    public List<ArenaPattern> patterns = new();
-    int patternIndex = 0;
-
-    NewMovement nm;
-
-    int deaths = 0;
     public void NewMovementRespawn()
     {
-        Debug.Log("=== RESPAWN SEQUENCE STARTED ===");
+        Debug.Log("Starting respawn");
 
         if (CameraController.Instance != null)
         {
@@ -281,7 +277,6 @@ Jsss000000000000";
         }
 
         deaths++;
-        Debug.Log($"Death counter increased to {deaths}");
 
         try
         {
@@ -405,7 +400,7 @@ Jsss000000000000";
             Debug.LogError($"Stack trace: {ex.StackTrace}");
         }
 
-        Debug.Log("=== RESPAWN SEQUENCE COMPLETED ===");
+        Debug.Log("Respawned");
     }
     void OnSceneLoaded(Scene scene, LoadSceneMode lsm)
     {
@@ -413,7 +408,7 @@ Jsss000000000000";
 
         if (scene.name == "b3e7f2f8052488a45b35549efb98d902") // Main Menu
         {
-           
+            //Command.Register();
 
             try
             {
@@ -476,18 +471,16 @@ Jsss000000000000";
         {
             print("Bootstrap loaded");
 
-            [DllImport("user32.dll")]
-            static extern IntPtr GetActiveWindow();
+            //[DllImport("user32.dll")]
+            //static extern IntPtr GetActiveWindow();
 
-            [DllImport("user32.dll")]
-            static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+            //[DllImport("user32.dll")]
+            //static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-            const int SW_MAXIMIZE = 3;
+            //const int SW_MAXIMIZE = 3;
             
-            IntPtr windowHandle = GetActiveWindow();
-            ShowWindow(windowHandle, SW_MAXIMIZE);
-
-
+            //IntPtr windowHandle = GetActiveWindow();
+            //ShowWindow(windowHandle, SW_MAXIMIZE);
         }
     }
 
@@ -515,11 +508,9 @@ Jsss000000000000";
         PrefabDatabase prefabs = cybergrid.prefabs;
 
         GameObject jumpPad = prefabs.jumpPad;
-        Debug.Log("[DEBUG] jumpPad instantiated: " + (jumpPad != null));
         jumpPad.name = "JUMPPADTEMPLATE";
         
         EndlessPrefabAnimator originalAnimator = jumpPad.GetComponent<EndlessPrefabAnimator>();
-        Debug.Log("[DEBUG] originalAnimator: " + (originalAnimator != null));
 
         bool reverse = originalAnimator.reverse;
         bool reverseOnly = originalAnimator.reverseOnly;
@@ -533,11 +524,9 @@ Jsss000000000000";
         prefabs.jumpPad = jumpPad;
 
         GameObject stairs = prefabs.stairs;
-        Debug.Log("[DEBUG] stairs instantiated: " + (stairs != null));
         stairs.name = "STAIRSTEMPLATE";
 
         EndlessPrefabAnimator stairsAnimator = stairs.GetComponent<EndlessPrefabAnimator>();
-        Debug.Log("[DEBUG] stairsAnimator: " + (stairsAnimator != null));
 
         bool stairsReverse = stairsAnimator.reverse;
         bool stairsReverseOnly = stairsAnimator.reverseOnly;
@@ -550,7 +539,6 @@ Jsss000000000000";
 
 
         EndlessStairs oldStairs = stairs.GetComponent<EndlessStairs>();
-        Debug.Log("[DEBUG] oldStairs: " + (oldStairs != null));
 
         MeshRenderer primaryRenderer = oldStairs.primaryMeshRenderer;
         MeshRenderer secondaryRenderer = oldStairs.secondaryMeshRenderer;
@@ -610,7 +598,7 @@ Jsss000000000000";
         CustomCybergrind cg = arenaGO.AddComponent<CustomCybergrind>();
         cg.gridCube = gridCube; 
         cg.prefabs = prefabs;
-        cg.nms = navMeshSurface;
+        //cg.nms = navMeshSurface;
         cg.offset = 5;
         cg.glowMultiplier = 1f;
 
@@ -650,7 +638,48 @@ Jsss000000000000";
             Debug.LogError("CurrentPatternPool is either null or empty");
         }
 
+        multiplayerStuff = Instantiate(new GameObject("MultiplayerStuff"));
+        multiplayerStuff.AddComponent<MultiplayerStuff>();
+        DontDestroyOnLoad(multiplayerStuff);
+
         Debug.Log("DoCGStuff completed");
+
+        CityShader();
+    }
+
+    void CityShader()
+    {
+        Transform cityTransform = transform.Find("/LustCity");
+        if (cityTransform == null)
+        {
+            Debug.LogError("Transform 'LustCity' not found.");
+            return;
+        }
+
+        GameObject cityObject = cityTransform.gameObject;
+        if (cityObject == null)
+        {
+            Debug.LogError("GameObject for 'LustCity' is null.");
+            return;
+        }
+
+        MeshRenderer meshRenderer = cityObject.GetComponent<MeshRenderer>();
+        if (meshRenderer == null)
+        {
+            Debug.LogError("MeshRenderer not found on 'LustCity'.");
+            return;
+        }
+        List<Material> mats = new List<Material>();
+        mats.Add(meshRenderer.sharedMaterials[1]);
+
+        Shader loadedShader = Addressables.LoadAssetAsync<Shader>("Assets/Shaders/MasterShader/ULTRAKILL-Standard.shader").WaitForCompletion();
+        if (loadedShader == null)
+        {
+            Debug.LogError("Shader failed to load from Addressables.");
+            return;
+        }
+
+        mats[0].shader = loadedShader;
     }
 
     void OpenMultiMenu()
@@ -686,7 +715,6 @@ Jsss000000000000";
             Clogger.LogWarning("No scenes found in the scene bundle.");
         }
     }
-
 
     public static void InvokePrivate<T>(T target, string methodName, object[] paramz)
     {
