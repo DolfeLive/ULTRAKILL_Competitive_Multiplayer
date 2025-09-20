@@ -132,7 +132,6 @@ class PostProcessPatches
     }
 }
 
-
 [HarmonyPatch(typeof(EndlessGrid), "LoadPattern")]
 public static class EndlessGrid_LoadPattern_Patch
 {
@@ -168,7 +167,7 @@ public static class EndlessGrid_LoadPattern_Patch
 
                 codes.InsertRange(startRemove, new List<CodeInstruction>
             {
-                new CodeInstruction(OpCodes.Ldloc_1), // Load local variable 'text'
+                new CodeInstruction(OpCodes.Ldloc_1), // load local var 'text'
                 new CodeInstruction(OpCodes.Call, debugLogMethod), // Debug.Log(object)
             });
 
@@ -234,26 +233,36 @@ public static class RespawnPatch
     }
 }
 
-[HarmonyPatch(typeof(GunControl), "SwitchWeapon")]
-public static class GuncSwitchWeaponPatch
-{
-    [HarmonyPostfix]
-    public static void SwitchWeaponPatch(
-        GunControl __instance,
-        int targetSlotIndex,
-        int? targetVariationIndex,
-        bool useRetainedVariation,
-        bool cycleSlot,
-        bool cycleVariation)
-    {
-        MultiplayerStuff.OnWeaponChange(__instance.currentSlotIndex, __instance.currentVariationIndex);
-    }
-}
 
 
 // Add patches for: player speed, rocket riding, bullets, damage receiving, shotgun bullet location rng and TimeController
 //
 //
+
+public static class ShootPatches
+{
+    [HarmonyPatch(typeof(Revolver), nameof(Revolver.Shoot))]
+    [HarmonyPostfix]
+    public static void RevolverShootPatch(Revolver __instance, int shotType)
+    {
+        Console.WriteLine($"Player shot revolver");
+        //     public static void SendShootRequest(Vector3 source, Vector3 direction, WeaponType weapon, byte variation, byte charge = 0, bool altFire = false)
+        //Console.WriteLine($"Revolver shot, source: {}, direction: {}, WeaponType: {WeaponType.Revolver}, Variation: {}, Charge: {}, altFire: {}");
+
+        Vector3 source = __instance.cc.transform.position;
+        Vector3 direction = __instance.cc.transform.forward;
+        WeaponType weapon = WeaponType.Revolver;
+        byte variation = (byte)__instance.gunVariation;
+        byte charge = 0;
+
+        bool altFire = __instance.altVersion;
+
+        Console.WriteLine(
+            $"Revolver shot, source: {source}, direction: {direction}, WeaponType: {weapon}, Variation: {variation}, Charge: {charge}, altFire: {altFire}"
+        );
+    }
+
+}
 
 
 
